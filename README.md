@@ -1,8 +1,8 @@
 # RadRead leaderboard
 
 The published results page for [RadRead](https://github.com/dylantirandaz/radread), a radiology
-reading benchmark: 243 studies, one model call each, deterministic scoring. A read passes only
-if every finding, box, diagnosis and next step is correct.
+reading benchmark: 243 studies, one model call each, deterministic scoring. Findings, boxes,
+diagnosis and next step must match the reference rubric; this is not a clinical error rate.
 
 - Page: https://dylantirandaz.com/radread-leaderboard/
 - Mirror: https://huggingface.co/spaces/tirandazdylan/radread-leaderboard

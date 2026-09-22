@@ -124,10 +124,10 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     """pass@k for k = 1..max_k, one line per model, as inline SVG.
 
     Drawn by hand rather than with a chart library so the page stays script-free: a light
-    grid, y axis from 0 to at least 60 %, circle markers, legend in the right margin.
+    grid, y axis from 0 to at least 60 %, circle markers, and a wrapping HTML legend.
     """
     width, height = 640, 360
-    left, right, top, bottom = 48, 150, 18, 40  # right margin holds the legend
+    left, right, top, bottom = 56, 20, 26, 40
     plot_w, plot_h = width - left - right, height - top - bottom
     ys = [m[f"pass@{k}"] for m in models for k in range(1, max_k + 1)]
     y_min = 0.0
@@ -153,6 +153,7 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
         parts.append(f'<text x="{x:.1f}" y="{top + plot_h + 18}" class="tick" text-anchor="middle">{k}</text>')
     parts.append(f'<text x="{left + plot_w / 2:.1f}" y="{height - 6}" class="tick" text-anchor="middle">k attempts</text>')
     parts.append(f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" class="frame"/>')
+    legend = []
     for index, model in enumerate(models):
         colour = PALETTE[index % len(PALETTE)]
         points = [(sx(k), sy(model[f"pass@{k}"])) for k in range(1, max_k + 1)]
@@ -160,12 +161,12 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
         parts.append(f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="1.6"/>')
         for x, y in points:
             parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" fill="{colour}"/>')
-        ly = top + 8 + index * 17
-        lx = left + plot_w + 18
-        parts.append(f'<line x1="{lx}" y1="{ly}" x2="{lx + 20}" y2="{ly}" stroke="{colour}" stroke-width="1.6"/>')
-        parts.append(f'<circle cx="{lx + 10}" cy="{ly}" r="3" fill="{colour}"/>')
-        parts.append(f'<text x="{lx + 28}" y="{ly + 4}" class="legend">{html.escape(model["name"])}</text>')
+        legend.append(
+            f'<li><span class="key-line" style="background:{colour}" aria-hidden="true"></span>'
+            f'{html.escape(model["name"])}</li>'
+        )
     parts.append("</svg>")
+    parts.append(f'<ul class="chart-key" aria-label="Models">{"".join(legend)}</ul>')
     return "".join(parts)
 
 
@@ -226,7 +227,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RadRead</title>
-<meta name="description" content="RadRead: vision-language models reading {tasks} radiographs. A read passes only if every finding, box, diagnosis and next step is correct.">
+<meta name="description" content="RadRead: vision-language models reading {tasks} radiographs. Findings, boxes, diagnosis and next step are scored against a fixed rubric.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -241,7 +242,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 <header class="hero">
   <div class="wrap">
     <h1>Vision-language models reading radiographs.</h1>
-    <p>{tasks} studies. A read passes only if every finding, box, diagnosis and next step is correct.</p>
+    <p>{tasks} studies. Findings, boxes, diagnosis and next step must all match the rubric.</p>
     <p class="meta">{max_k} attempts per study · {rollouts:,} reads · {built}</p>
   </div>
 </header>
@@ -259,7 +260,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
   </article>
   <article class="card figure-card">
     <p class="figure">{unsolved['count']}</p>
-    <p class="caption">studies no model solved</p>
+    <p class="caption">studies with no passing read</p>
   </article>
 </div>
 
@@ -268,7 +269,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
     <h2>Leaderboard</h2>
     {leaderboard_table(models, max_k)}
     <p class="caption">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
-    checks passed. Never solved: correct in 0 of {max_k} attempts.</p>
+    checks passed. Never solved: passed in 0 of {max_k} attempts.</p>
   </article>
 
   <article class="card span2">
@@ -300,7 +301,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
       <li>diagnosis in the accepted set;</li>
       <li>next step in the accepted set.</li>
     </ol>
-    <p>No partial credit. Missing or unparseable output fails.</p>
+    <p>No partial credit. Missing or unparseable output fails. A failed read is not necessarily a clinical error.</p>
   </article>
 
   <article class="card">
@@ -370,71 +371,78 @@ html {
 
 body { margin: 0; color: var(--ink); background: #fff; line-height: 1.5; }
 
-.wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; }
+.wrap { width: min(1080px, calc(100% - 3rem)); margin: 0 auto; }
 
-/* top bar */
+/* centered masthead */
 
-nav.top { border-bottom: 1px solid var(--hair); }
-nav.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 3.6rem; }
-nav.top .brand { font-size: 1.15rem; text-decoration: none; color: var(--ink); }
-nav.top .links { display: flex; align-items: center; gap: 1.5rem; font-family: var(--sans); font-size: 0.85rem; }
+nav.top .wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0 1.35rem;
+  border-bottom: 1px solid var(--rule);
+}
+nav.top .brand { font-size: 2.6rem; line-height: 1.1; letter-spacing: -0.045em; text-decoration: none; color: var(--ink); }
+nav.top .links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem 1.6rem; font-family: var(--sans); font-size: 0.82rem; }
 nav.top .links a { color: var(--ink); text-decoration: none; }
 nav.top .links a:hover { text-decoration: underline; }
 nav.top .btn { border: 1px solid var(--ink); padding: 0.35rem 0.8rem; }
 nav.top .btn:hover { background: var(--ink); color: #fff; text-decoration: none; }
 
-/* hero band */
+/* editorial introduction */
 
-header.hero { background: var(--band); padding: 4rem 0 4rem; }
+header.hero { padding: clamp(2.5rem, 5vw, 4.25rem) 0 2.75rem; text-align: center; }
 header.hero h1 {
-  margin: 0 0 1rem;
-  max-width: 34rem;
-  font-size: 2.6rem;
-  font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  margin: 0 auto 1.25rem;
+  max-width: 42rem;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
 }
-header.hero p { margin: 0; max-width: 34rem; font-size: 1.1rem; }
-header.hero .meta { margin-top: 0.8rem; }
+header.hero p { margin: 0 auto; max-width: 36rem; font-size: 1.08rem; text-wrap: balance; }
+header.hero .meta { margin-top: 1.2rem; font-size: 0.78rem; }
 
 .meta, .caption { font-family: var(--sans); color: var(--mute); font-size: 0.82rem; line-height: 1.55; }
 .caption { margin: 1rem 0 0; }
 
-/* cards */
+/* results and supporting sections */
 
-main.wrap { padding-top: 2rem; padding-bottom: 2rem; }
+main.wrap { padding-bottom: 2rem; }
 
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-.grid.three { grid-template-columns: repeat(3, 1fr); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem 2.5rem; }
+.grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 1.65rem 0; margin-bottom: 3rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 .span2 { grid-column: 1 / -1; }
-.two { display: grid; grid-template-columns: 3fr 2fr; gap: 2rem; align-items: start; }
-.two.even { grid-template-columns: 1fr 1fr; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; max-width: 46rem; margin: 0 auto; }
+.two.even { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; max-width: none; }
 .two > div { min-width: 0; }
 
 .card {
-  background: #fff;
-  border: 1px solid var(--rule);
-  padding: 1.75rem 1.9rem 1.9rem;
+  border-top: 1px solid var(--rule);
+  padding: 1.5rem 0 0;
   min-width: 0;
 }
 
 .card h2 {
-  margin: 0 0 1.1rem;
-  font-size: 1.45rem;
-  font-weight: 500;
+  margin: 0 0 1.25rem;
+  font-size: 1.65rem;
+  font-weight: 400;
   line-height: 1.25;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.02em;
 }
-.card h2.later { margin-top: 2rem; }
+.grid > .card:first-child { border-top: 0; padding-top: 0; }
 
 .card p { margin: 0 0 0.8rem; }
 .card ol, .card ul { margin: 0 0 0.8rem; padding-left: 1.2rem; }
 .card li { margin-bottom: 0.3rem; }
 
-.figure-card { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-.figure { margin: 0; font-size: 3rem; font-weight: 400; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.figure-card { padding: 0 1rem; border-top: 0; text-align: center; }
+.figure-card + .figure-card { border-left: 1px solid var(--rule); }
+.figure { margin: 0; font-size: clamp(2.3rem, 4vw, 3rem); font-weight: 400; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
 .figure span { font-size: 1.2rem; margin-left: 0.1rem; }
-.figure-card .caption { margin-top: 0.6rem; }
+.figure-card .caption { margin: 0.65rem 0 0; font-size: 0.78rem; }
 
 /* tables */
 
@@ -445,11 +453,12 @@ table {
   border-collapse: collapse;
   font-family: var(--sans);
   font-variant-numeric: tabular-nums;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
 }
 th, td { padding: 0.6rem 0.6rem; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; }
 thead th { border-bottom: 1px solid var(--ink); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mute); }
 tbody tr:last-child td { border-bottom: 1px solid var(--ink); }
+table.board tbody tr:hover { background: var(--band); }
 th:first-child, td:first-child { padding-left: 0; }
 th:last-child, td:last-child { padding-right: 0; }
 .num { text-align: right; }
@@ -484,20 +493,22 @@ a:hover { color: var(--mute); }
 .chart { display: block; width: 100%; height: auto; margin: 0; font-family: var(--sans); }
 .chart .grid { stroke: #e6e8eb; stroke-width: 1; }
 .chart .frame { fill: none; stroke: var(--ink); stroke-width: 1; }
-.chart .tick { font-size: 11px; fill: var(--mute); }
-.chart .legend { font-size: 12px; fill: var(--ink); }
+.chart .tick { font-size: 12px; fill: var(--mute); }
+.card .chart-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 0.82rem; }
+.card .chart-key li { display: flex; align-items: center; gap: 0.45rem; margin: 0; }
+.key-line { display: inline-block; width: 1.25rem; height: 2px; }
 
-footer.wrap { padding-top: 1rem; padding-bottom: 3rem; font-family: var(--sans); font-size: 0.78rem; color: var(--mute); }
+footer.wrap { padding-top: 1rem; padding-bottom: 3rem; border-top: 1px solid var(--rule); font-family: var(--sans); font-size: 0.78rem; color: var(--mute); }
 
 /* trace pages */
 
-main.wide { padding-top: 2.5rem; }
-.crumb { margin: 0 0 1.25rem; font-family: var(--sans); font-size: 0.82rem; color: var(--mute); }
-h1.study { margin: 0 0 0.4rem; font-size: 2rem; font-weight: 500; letter-spacing: -0.01em; }
-.study-meta { margin: 0 0 2rem; }
-.study-meta.lede { font-family: var(--serif); font-size: 1.05rem; color: var(--ink); }
+main.wide { padding-top: 3rem; }
+.crumb { margin: 0 0 1.5rem; font-family: var(--sans); font-size: 0.82rem; color: var(--mute); overflow-wrap: anywhere; }
+h1.study { margin: 0 0 0.5rem; font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 400; letter-spacing: -0.025em; overflow-wrap: anywhere; }
+.study-meta { margin: 0 0 2.5rem; }
+.study-meta.lede { font-family: var(--serif); font-size: 1.1rem; color: var(--ink); }
 
-.card.section { margin-bottom: 1.5rem; }
+.card.section { margin-bottom: 2.5rem; }
 .card.section h2 .marks { font-family: var(--sans); font-size: 0.95rem; vertical-align: middle; }
 
 pre.prompt, pre.reply {
@@ -543,17 +554,32 @@ table.checks td { padding: 0.25rem 0.7rem 0.25rem 0; border-bottom: 0; white-spa
 table.checks tbody tr:last-child td { border-bottom: 0; }
 table.checks td.mark { width: 1rem; padding-right: 0.4rem; }
 table.checks td.mark.ko { color: var(--ink); }
-p.nav { display: flex; justify-content: space-between; gap: 1rem; font-family: var(--sans); font-size: 0.85rem; }
+p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-family: var(--sans); font-size: 0.85rem; overflow-wrap: anywhere; }
 
-@media (max-width: 900px) {
-  .grid, .grid.three, .two, .two.even { grid-template-columns: 1fr; }
-  header.hero { padding: 2.5rem 0; }
-  header.hero h1 { font-size: 2rem; }
-  nav.top .wrap { height: auto; flex-wrap: wrap; gap: 0.5rem 1rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
-  nav.top .links { gap: 0.9rem; flex-wrap: wrap; }
+@media (max-width: 1000px) {
+  .grid:not(.three), .two.even { grid-template-columns: minmax(0, 1fr); }
   .plot, th.plot { display: none; }
-  dl { grid-template-columns: 1fr; gap: 0 0; }
-  dt { margin-top: 0.6rem; }
+}
+
+@media (max-width: 600px) {
+  .wrap { width: calc(100% - 2rem); }
+  nav.top .wrap { padding-top: 1.5rem; gap: 0.8rem; }
+  nav.top .brand { font-size: 2.25rem; }
+  nav.top .links { gap: 0.5rem 1rem; font-size: 0.76rem; }
+  nav.top .btn { padding: 0.3rem 0.6rem; }
+  header.hero { padding: 2.5rem 0 2rem; }
+  header.hero p { font-size: 1rem; }
+  header.hero .meta { font-size: 0.72rem; }
+  .grid.three { padding: 1.25rem 0; margin-bottom: 2.25rem; }
+  .figure-card { padding: 0 0.4rem; }
+  .figure { font-size: 2rem; }
+  .figure span { font-size: 0.85rem; }
+  .figure-card .caption { font-size: 0.7rem; line-height: 1.4; }
+  .card h2 { font-size: 1.5rem; }
+  .chart .tick { font-size: 20px; }
+  dl { grid-template-columns: 6rem minmax(0, 1fr); gap: 0.6rem 0.8rem; }
+  .meta-inline { display: block; margin: 0.4rem 0 0; }
+  details.attempt summary, table.checks { overflow-wrap: anywhere; }
 }
 """
 
