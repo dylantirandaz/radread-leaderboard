@@ -1,7 +1,7 @@
 """Render the RadRead results site from results/leaderboard.json.
 
-The site is static HTML with no JavaScript: every number is baked in at build time, so the page
-works from a file:// path, a GitHub Pages deploy, or a Hugging Face static Space unchanged.
+All results are baked into static HTML. Optional JavaScript animates the result bars;
+scores, tables and links work without it, including from file://, Pages and static Spaces.
 
 usage: python scripts/build_site.py --data results/leaderboard.json --out site
 """
@@ -36,18 +36,22 @@ REPO_URL = "https://github.com/dylantirandaz/radread-public"
 HF_SPACE = "https://huggingface.co/spaces/tirandazdylan/radread-leaderboard"
 HF_DATA = "https://huggingface.co/datasets/tirandazdylan/radread-public-results"
 SITE_REPO = "https://github.com/dylantirandaz/radread-leaderboard"
-STATIC_ASSETS = ("site_assets/source-serif-4-latin.woff2", "site_assets/OFL.txt")
+STATIC_ASSETS = (
+    "site_assets/source-serif-4-latin.woff2",
+    "site_assets/OFL.txt",
+    "site_assets/queue.js",
+)
 
 
 def pct(value: float) -> str:
     return f"{value * 100:.1f}"
 
 
-def bar(value: float, width: int = 120, height: int = 7) -> str:
-    """A single filled rule, drawn with a nested span rather than an image or chart library."""
-    filled = max(1, round(value * width))
+def bar(value: float, width: int = 120) -> str:
+    """Render a static result bar; numerical scores remain the authoritative values."""
+    filled = max(0, min(width, round(value * width)))
     return (
-        f'<span class="bar" style="width:{width}px;height:{height}px">'
+        f'<span class="bar" style="width:{width}px" aria-hidden="true">'
         f'<span class="fill" style="width:{filled}px"></span></span>'
     )
 
@@ -130,19 +134,19 @@ def source_table(models: list[dict[str, Any]], max_k: int) -> str:
 
 
 LINE_STYLES = (
-    ("#0072B2", "none"),
-    ("#D55E00", "8 4"),
-    ("#008768", "3 3"),
-    ("#A66A00", "10 3 2 3"),
-    ("#B23A69", "2 5"),
+    ("#3A7097", "none"),
+    ("#B06B37", "8 4"),
+    ("#39745E", "3 4"),
+    ("#896A89", "10 3 2 3"),
+    ("#555555", "2 5"),
 )
 
 
 def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     """pass@k for k = 1..max_k, one line per model, as inline SVG.
 
-    Drawn by hand rather than with a chart library so the page stays script-free: a light
-    grid, y axis from 0 to at least 60 %, distinct colors and dashes, and a wrapping legend.
+    Drawn without a chart library: a light grid, y axis from 0 to at least 60 %,
+    distinct colors and dashes, and a wrapping model key.
     """
     width, height = 640, 360
     left, right, top, bottom = 56, 20, 26, 40
@@ -196,13 +200,14 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
             for i, (x, y) in enumerate(points)
         )
         parts.append(
-            f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="2" stroke-dasharray="{dash}"/>'
+            f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="2" stroke-dasharray="{dash}">'
+            f'<title>{html.escape(model["name"])}</title></path>'
         )
         for x, y in points:
-            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" fill="{colour}"/>')
+            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3" fill="{colour}"/>')
         legend.append(
-            f'<li><svg class="key-line" viewBox="0 0 32 8" aria-hidden="true">'
-            f'<line x1="0" y1="4" x2="32" y2="4" stroke="{colour}" stroke-width="2" stroke-dasharray="{dash}"/>'
+            f'<li><svg class="key-line" viewBox="0 0 40 8" aria-hidden="true">'
+            f'<line x1="0" y1="4" x2="40" y2="4" stroke="{colour}" stroke-width="2" stroke-dasharray="{dash}"/>'
             f"</svg>"
             f'{html.escape(model["name"])}</li>'
         )
@@ -250,7 +255,7 @@ def repeated_replies(audit: dict[str, Any] | None, models: list[dict[str, Any]])
         return ""
     pairs = sum(m["tasks_with_repeated_reply"] for m in audit["models"])
     total = sum(m["tasks"] for m in models)
-    return f"A reply repeated verbatim in {pairs} of {total:,} model–study pairs."
+    return f"Repeated replies: {pairs} of {total:,} model–study pairs."
 
 
 def render(
@@ -284,8 +289,10 @@ def render(
 <meta name="description" content="RadRead: frontier models reading {tasks} radiographs. Findings, boxes, diagnosis and next step are scored against a fixed rubric.">
 <link rel="preload" href="site_assets/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
+<script src="site_assets/queue.js" defer></script>
 </head>
 <body>
+<a class="skip-link" href="#leaderboard">Skip to results</a>
 
 <nav class="top">
   <div class="wrap">
@@ -302,14 +309,14 @@ def render(
       Dots are grouped by outcome, not source or task order.">
       {study_dots}
     </div>
-    <p class="eyebrow">One dot per study · outlined = never solved</p>
-    <h1><span>Frontier models</span> <span>reading radiographs.</span></h1>
-    <p class="hero-description">{tasks} studies. Findings, boxes, diagnosis and next step must all match the rubric.</p>
+    <p class="eyebrow">{tasks} studies · hollow dots never passed</p>
+    <h1><span>Can models read</span> <span>radiographs?</span></h1>
+    <p class="hero-description">Findings, boxes, diagnosis, next step. All must pass.</p>
     <div class="action-links">
-      <a href="#leaderboard">Explore results <span aria-hidden="true">↓</span></a>
+      <a href="#leaderboard">Results <span aria-hidden="true">↓</span></a>
       <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
     </div>
-    <p class="meta">{max_k} attempts per study · {rollouts:,} reads</p>
+    <p class="meta">{len(models)} models · {max_k} attempts per study · {rollouts:,} reads</p>
   </div>
 </header>
 
@@ -317,8 +324,7 @@ def render(
 
 <section class="result-section" id="leaderboard" aria-labelledby="leaderboard-title">
   <div class="section-heading">
-    <h2 id="leaderboard-title">How frontier models perform</h2>
-    <p>{len(models)} models. One fixed rubric.</p>
+    <h2 id="leaderboard-title">Leaderboard</h2>
   </div>
   <div class="metric-grid">
     <div class="figure-card">
@@ -331,18 +337,20 @@ def render(
     </div>
     <div class="figure-card">
       <p class="figure">{unsolved['count']}</p>
-      <p class="caption">studies with no passing read</p>
+      <p class="caption">never solved by any model</p>
     </div>
   </div>
+  <div class="readout" data-readout>
   {leaderboard_table(models, max_k)}
-  <p class="caption">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
-  checks passed. Never solved: passed in 0 of {max_k} attempts.</p>
+  <p class="caption">pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed. Never solved = 0/{max_k}.
+    <button type="button" data-queue-replay aria-label="Replay result bars" hidden>Replay</button>
+  </p>
+  </div>
 </section>
 
 <section class="result-section" aria-labelledby="attempts-title">
   <div class="section-heading">
-    <h2 id="attempts-title">Accuracy across attempts</h2>
-    <p>pass@1 through pass@{max_k}, averaged over every study.</p>
+    <h2 id="attempts-title">More attempts, more passes?</h2>
   </div>
   <div class="curve-layout">
     <figure class="chart-figure">{passk_chart(models, max_k)}</figure>
@@ -351,14 +359,12 @@ def render(
 </section>
 
 <section class="result-section" aria-labelledby="breakdown-title">
-  <div class="section-heading">
-    <h2 id="breakdown-title">A closer look at the results</h2>
-  </div>
+  <div class="section-heading"><h2 id="breakdown-title">Source &amp; consistency</h2></div>
   <div class="two even">
     <article class="panel">
-      <h3>Attempts correct</h3>
+      <h3>Passing attempts</h3>
       {reliability(models, max_k)}
-      <p class="caption">Temperature 0. {repeats}</p>
+      <p class="caption">{repeats}</p>
     </article>
     <article class="panel">
       <h3>pass@{max_k} by source</h3>
@@ -369,33 +375,31 @@ def render(
 
 <section class="result-section" id="method" aria-labelledby="method-title">
   <div class="section-heading">
-    <h2 id="method-title">One study. A complete read.</h2>
-    <p>One image, one call, one JSON response. A deterministic grader, not a judge model.</p>
+    <h2 id="method-title">What counts as a pass?</h2>
+    <p>One image. One response. Deterministic scoring.</p>
   </div>
   <div class="criteria-grid">
     <article>
       <h3>Findings</h3>
-      <p>Every checklist key answered and matching gold.</p>
+      <p>Every checklist answer matches gold.</p>
     </article>
     <article>
       <h3>Localization</h3>
-      <p>Every must-find lesion matched by one box using the grader's IoU, centre or containment test.
-      Extra boxes must stay within the study's quota.</p>
+      <p>Required lesions localized; extra-box limits met.</p>
     </article>
     <article>
       <h3>Diagnosis</h3>
-      <p>The diagnosis must be in the study's accepted set.</p>
+      <p>An accepted diagnosis.</p>
     </article>
     <article>
       <h3>Next step</h3>
-      <p>The management recommendation must be in the accepted set.</p>
+      <p>An accepted management recommendation.</p>
     </article>
   </div>
-  <p class="method-note">All checks must pass. No partial credit for a study pass. Missing or unparseable output fails.
-  A failed read is not necessarily a clinical error.</p>
+  <p class="method-note">All checks must pass. Invalid outputs fail.<br>Rubric agreement—not a clinical error rate.</p>
   <div class="two even protocol-grid">
     <article>
-      <h3>Evaluation protocol</h3>
+      <h3>Protocol</h3>
       <dl>
         <dt>Rollouts</dt><dd>{max_k} per study</dd>
         <dt>Sampling</dt><dd>temperature {protocol['temperature']}, {protocol['max_tokens']:,} max tokens</dd>
@@ -406,21 +410,18 @@ def render(
     </article>
     <article>
       <h3>Never solved</h3>
-      <p>{unsolved['count']} of {tasks} studies had no passing read across any model or attempt. {unsolved_sources}.</p>
-      <p class="caption">The outlined dots above represent these studies. Images come from ChestX-Det,
-      NIH ChestX-ray14, VinDr-CXR, GRAZPEDWRI-DX and RSNA Pneumonia.</p>
+      <p>{unsolved['count']}/{tasks} studies never passed: {unsolved_sources}.</p>
+      <p class="caption"><a href="{REPO_URL}/blob/main/NOTICE.md">Source terms</a> · Images and gold are not distributed.</p>
     </article>
   </div>
 </section>
 
 <section class="explore" aria-labelledby="explore-title">
-  <h2 id="explore-title">Explore the benchmark</h2>
-  <p>Read the tasks, inspect every attempt, or work with the results.
-  Radiographs and gold are not published.</p>
+  <h2 id="explore-title">Look closer.</h2>
   <div class="action-links">
     <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
-    <a href="traces/index.html">All traces <span aria-hidden="true">↗</span></a>
-    <a href="{HF_DATA}">Result data <span aria-hidden="true">↗</span></a>
+    <a href="traces/index.html">Traces <span aria-hidden="true">↗</span></a>
+    <a href="{HF_DATA}">Data <span aria-hidden="true">↗</span></a>
   </div>
 </section>
 
@@ -428,7 +429,7 @@ def render(
 
 <footer class="wrap">
   <p>RadRead · {built}</p>
-  <p><a href="{HF_SPACE}">Hugging Face mirror</a> · <a href="{SITE_REPO}">Site source</a></p>
+  <p><a href="{HF_SPACE}">HF mirror</a> · <a href="{SITE_REPO}">Source</a></p>
 </footer>
 
 </body>
@@ -445,16 +446,26 @@ CSS = """@font-face {
 }
 
 :root {
-  --ink: #222;
-  --mute: #666;
-  --rule: #ddd;
-  --band: #fafafa;
+  --ink: #222725;
+  --mute: #5e6562;
+  --rule: #dce4df;
+  --band: #f4f8f5;
+  --mint: #98e6c5;
+  --mint-ink: #216954;
+  --mint-wash: #edf9f3;
+  --pink: #f3c5e5;
+  --pink-ink: #ad358b;
+  --pink-wash: #fcf1f8;
+  --lime: #dcea74;
+  --lavender: #c5b8d9;
   --serif: "Source Serif 4", Georgia, serif;
   --sans: Arial, Helvetica, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
+::selection { background: var(--mint); color: var(--ink); }
 
 html {
   font-family: var(--serif);
@@ -466,6 +477,8 @@ html {
 body { margin: 0; color: var(--ink); background: #fff; line-height: 1.5; }
 
 .wrap { width: min(1000px, calc(100% - 3rem)); margin: 0 auto; }
+.skip-link { position: absolute; top: -5rem; left: 1rem; z-index: 20; padding: 0.6rem 1rem; background: #fff; }
+.skip-link:focus { top: 1rem; }
 
 nav.top { position: sticky; top: 0; z-index: 10; background: #fff; }
 nav.top .wrap {
@@ -478,10 +491,15 @@ nav.top .wrap {
 }
 nav.top .brand { font-size: 1.35rem; font-weight: 500; line-height: 1; letter-spacing: -0.04em; text-decoration: none; color: var(--ink); }
 nav.top .links { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 1.6rem; font-family: var(--sans); font-size: 0.78rem; }
-nav.top .links a { color: var(--ink); text-decoration: none; }
-nav.top .links a:hover { text-decoration: underline; }
+nav.top .links a { padding: 0.3rem 0; color: var(--ink); text-decoration: none; }
+nav.top .links a:hover { color: var(--mint-ink); text-decoration: underline; }
 
-header.hero { padding: 4rem 0 7rem; text-align: center; }
+header.hero {
+  padding: 3.5rem 0 5rem;
+  text-align: center;
+  background: radial-gradient(ellipse at 18% 0, var(--pink-wash), transparent 45%),
+    radial-gradient(ellipse at 82% 0, var(--mint-wash), transparent 45%);
+}
 .study-map {
   display: grid;
   grid-template-columns: repeat(81, minmax(0, 1fr));
@@ -490,9 +508,11 @@ header.hero { padding: 4rem 0 7rem; text-align: center; }
   width: 100%;
   margin: 0 auto 2rem;
 }
-.study-map span { width: 5px; height: 5px; border: 1px solid var(--ink); border-radius: 50%; }
-.study-map .solved { background: var(--ink); }
-.study-map .unsolved { background: #fff; }
+.study-map span { width: 5px; height: 5px; border: 1px solid var(--mint-ink); border-radius: 50%; }
+.study-map .solved { background: var(--mint-ink); }
+.study-map .unsolved { background: #fff; border-color: var(--pink-ink); }
+[data-queue-replay] { padding: 0.25rem 0.45rem; border: 1px solid var(--rule); border-radius: 0.2rem; background: #fff; color: var(--ink); font: inherit; cursor: pointer; }
+[data-queue-replay]:hover { background: var(--mint-wash); border-color: var(--mint-ink); }
 header.hero .eyebrow { margin: 0 0 1rem; font-family: var(--sans); font-size: 0.75rem; color: var(--mute); }
 header.hero h1 {
   margin: 0 auto 1.4rem;
@@ -507,34 +527,40 @@ header.hero h1 span { display: block; }
 .hero-description { margin: 0 auto; max-width: 27rem; color: var(--mute); font-size: 1.05rem; line-height: 1.6; text-wrap: balance; }
 header.hero .meta { margin: 1.8rem 0 0; font-size: 0.75rem; }
 .action-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem 1.75rem; margin-top: 1.8rem; font-family: var(--sans); font-size: 0.84rem; }
-.action-links a { text-decoration: none; }
-.action-links a:hover { text-decoration: underline; }
+.action-links a { padding: 0.35rem 0; text-decoration: none; border-bottom: 2px solid var(--mint); }
+.action-links a:nth-child(2) { border-color: var(--pink); }
+.action-links a:nth-child(3) { border-color: var(--lime); }
+.action-links a:hover { color: var(--mint-ink); border-color: currentColor; }
 .action-links span { margin-left: 0.3rem; }
 
 .meta, .caption { font-family: var(--sans); color: var(--mute); font-size: 0.82rem; line-height: 1.55; }
 .caption { margin: 1rem 0 0; }
 
 main.wrap { padding-bottom: 2rem; }
-.result-section { margin-bottom: 7rem; scroll-margin-top: 6rem; }
+.result-section { margin-bottom: 5rem; scroll-margin-top: 6rem; }
 .section-heading { margin: 0 auto 2.5rem; text-align: center; }
 .section-heading h2, .explore h2 { margin: 0 0 1rem; font-size: clamp(1.6rem, 2.8vw, 2rem); font-weight: 400; line-height: 1.25; letter-spacing: -0.025em; text-wrap: balance; }
 .section-heading p { max-width: 34rem; margin: 0 auto; color: var(--mute); font-family: var(--sans); font-size: 0.9rem; text-wrap: balance; }
 .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 3rem 0; }
-.curve-layout { max-width: 46rem; margin: 0 auto; display: grid; gap: 2.25rem; }
+.curve-layout { max-width: 46rem; margin: 0 auto; display: grid; gap: 1.5rem; }
 .two.even { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
 .two > *, .criteria-grid > * { min-width: 0; }
-.panel { min-width: 0; padding: 1.5rem; background: var(--band); border-radius: 0.35rem; }
+.panel { min-width: 0; padding: 1.5rem; background: var(--mint-wash); border-radius: 0.35rem; }
+.panel:nth-child(2) { background: var(--pink-wash); }
 .landing h3 { margin: 0 0 1rem; font-size: 1.2rem; font-weight: 400; line-height: 1.3; }
 .panel th, .panel td { padding-left: 0.5rem; padding-right: 0.5rem; }
 .panel table { font-size: 0.8rem; }
 .criteria-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; }
+.criteria-grid article { padding-top: 1rem; border-top: 3px solid var(--mint); }
+.criteria-grid article:nth-child(2) { border-color: var(--pink); }
+.criteria-grid article:nth-child(3) { border-color: var(--lime); }
+.criteria-grid article:nth-child(4) { border-color: var(--lavender); }
 .criteria-grid h3 { font-family: var(--sans); font-size: 0.9rem; font-weight: 500; }
 .criteria-grid p { margin: 0; font-family: var(--sans); color: var(--mute); font-size: 0.85rem; line-height: 1.6; }
 .method-note { margin: 2.5rem auto 0; max-width: 38rem; text-align: center; font-size: 0.95rem; color: var(--mute); text-wrap: balance; }
-.protocol-grid { margin-top: 4rem; }
+.protocol-grid { margin-top: 3rem; }
 .protocol-grid p { margin: 0 0 1rem; }
 .explore { padding: 1rem 0 5rem; text-align: center; }
-.explore > p { margin: 0 auto; max-width: 29rem; color: var(--mute); text-wrap: balance; }
 
 .card {
   border-top: 1px solid var(--rule);
@@ -559,6 +585,8 @@ main.wrap { padding-bottom: 2rem; }
 .figure span { font-size: 1rem; margin-left: 0.1rem; }
 .figure-card .caption { margin: 0.7rem 0 0; font-size: 0.75rem; }
 .figure-card .caption span { white-space: nowrap; }
+.figure-card:first-child .figure { color: var(--mint-ink); }
+.figure-card:nth-child(2) .figure { color: var(--pink-ink); }
 
 /* tables */
 
@@ -584,34 +612,42 @@ th:last-child, td:last-child { padding-right: 0; }
 .strong { font-weight: 700; }
 .plot { width: 130px; }
 .mute { color: var(--mute); }
-th .n { display: block; font-size: 0.68rem; color: #888; }
+th .n { display: block; font-size: 0.68rem; color: var(--mute); }
 
-.bar { display: inline-block; vertical-align: middle; background: #eee; }
-.bar .fill { display: block; height: 100%; background: var(--ink); }
+.bar { display: inline-block; height: 7px; vertical-align: middle; background: #eee; overflow: hidden; }
+.bar .fill { display: block; height: 100%; background: #222; transform-origin: left; }
+.readout.is-replaying .fill { animation: result-load 1100ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--queue-delay); }
+@keyframes result-load {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .readout .fill { animation: none !important; }
+}
 
 .band { width: 46%; }
-.stack { display: flex; width: 100%; height: 7px; background: #eee; }
+.stack { display: flex; width: 100%; height: 7px; background: var(--pink); }
 .seg { display: block; height: 100%; }
-.seg.always { background: var(--ink); }
-.seg.sometimes { background: #aaa; }
-.seg.never { background: #eee; }
+.seg.always { background: var(--mint-ink); }
+.seg.sometimes { background: var(--mint); }
+.seg.never { background: var(--pink); }
 
 dl { display: grid; grid-template-columns: 8rem 1fr; gap: 0.45rem 1rem; margin: 0; font-family: var(--sans); font-size: 0.86rem; }
 dt { color: var(--mute); }
 dd { margin: 0; }
 
 a { color: var(--ink); text-decoration: underline; text-underline-offset: 0.18em; }
-a:hover { color: var(--mute); }
-a:focus-visible, summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+a:hover { color: var(--mint-ink); }
+a:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px solid var(--mint-ink); outline-offset: 4px; }
 
 .chart-figure { min-width: 0; margin: 0; }
 .chart { display: block; width: 100%; height: auto; margin: 0; font-family: var(--sans); }
 .chart .grid { stroke: var(--rule); stroke-width: 1; }
 .chart .frame { fill: none; stroke: #999; stroke-width: 1; }
 .chart .tick { font-size: 12px; fill: var(--mute); }
-.chart-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 0.82rem; }
-.chart-key li { display: flex; align-items: center; gap: 0.45rem; margin: 0; }
-.key-line { display: block; flex: 0 0 2rem; width: 2rem; height: 0.5rem; }
+.chart-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem 1.25rem; margin: 1rem 0 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 0.82rem; }
+.chart-key li { display: flex; align-items: center; gap: 0.5rem; margin: 0; }
+.key-line { display: block; flex: 0 0 2.5rem; width: 2.5rem; height: 0.5rem; }
 
 footer.wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0 1rem; padding-top: 1rem; padding-bottom: 2rem; border-top: 1px solid var(--rule); font-family: var(--sans); font-size: 0.75rem; color: var(--mute); }
 
@@ -630,7 +666,7 @@ pre.prompt, pre.reply {
   margin: 0;
   padding: 0.9rem 1rem;
   border: 1px solid var(--rule);
-  background: #fafafa;
+  background: var(--band);
   font-family: var(--mono);
   font-size: 0.78rem;
   line-height: 1.5;
@@ -643,8 +679,8 @@ pre.reasoning { background: #fff; color: #555; }
 .marks, .att { font-family: var(--sans); font-size: 0.85rem; letter-spacing: 0.06em; white-space: nowrap; }
 .marks { margin-left: 0.6rem; }
 th.att, td.att { text-align: center; }
-.ok { color: var(--ink); }
-.ko { color: #bbb; }
+.ok { color: var(--mint-ink); }
+.ko { color: var(--pink-ink); }
 table.traces td.model a { text-decoration: none; }
 table.traces td.model a:hover { text-decoration: underline; }
 
@@ -654,8 +690,8 @@ details.attempt summary::-webkit-details-marker { display: none; }
 details.attempt[open] summary { border-bottom: 1px solid var(--rule); }
 details.attempt .body { padding: 0.7rem 0.9rem 1rem; }
 .tag { display: inline-block; min-width: 2.6rem; margin-right: 0.6rem; padding: 0.05rem 0.4rem; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; border: 1px solid var(--ink); }
-.tag.pass { background: var(--ink); color: #fff; }
-.tag.fail { color: var(--mute); border-color: #bbb; }
+.tag.pass { background: var(--mint-wash); color: var(--mint-ink); border-color: var(--mint-ink); }
+.tag.fail { background: var(--pink-wash); color: var(--pink-ink); border-color: var(--pink-ink); }
 .why { color: var(--mute); }
 .why code, table.checks code { font-family: var(--mono); font-size: 0.78rem; color: var(--ink); }
 .meta-inline { color: var(--mute); font-size: 0.78rem; margin-left: 0.4rem; }
@@ -668,7 +704,7 @@ table.checks { width: auto; font-size: 0.8rem; margin: 0.3rem 0 0.6rem; }
 table.checks td { padding: 0.25rem 0.7rem 0.25rem 0; border-bottom: 0; white-space: normal; }
 table.checks tbody tr:last-child td { border-bottom: 0; }
 table.checks td.mark { width: 1rem; padding-right: 0.4rem; }
-table.checks td.mark.ko { color: var(--ink); }
+table.checks td.mark.ko { color: var(--pink-ink); }
 p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-family: var(--sans); font-size: 0.85rem; overflow-wrap: anywhere; }
 
 @media (max-width: 1000px) {
@@ -685,6 +721,7 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
   .wrap { width: calc(100% - 2rem); }
   nav.top .wrap { width: calc(100% - 2rem); flex-wrap: wrap; padding: 1rem 0; gap: 0.85rem; }
   nav.top .links { gap: 0.5rem 1rem; font-size: 0.72rem; }
+  .readout .board { font-size: 0.8rem; }
   header.hero { padding: 2.5rem 0 4.5rem; }
   .study-map { margin-bottom: 1.5rem; }
   .hero-description { font-size: 1rem; }
