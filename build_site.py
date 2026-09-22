@@ -497,8 +497,8 @@ def main() -> None:
     data = json.loads(args.data.read_text(encoding="utf-8"))
     built = dt.date.today().isoformat()
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "index.html").write_text(render(data, built), encoding="utf-8")
-    (args.out / "style.css").write_text(CSS, encoding="utf-8")
+    (args.out / "index.html").write_text(render(data, built), encoding="utf-8", newline="\n")
+    (args.out / "style.css").write_text(CSS, encoding="utf-8", newline="\n")
     shutil.copyfile(args.data, args.out / "leaderboard.json")
     print(f"wrote {args.out / 'index.html'}")
 
