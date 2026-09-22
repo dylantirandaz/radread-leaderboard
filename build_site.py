@@ -534,6 +534,8 @@ a:hover { color: var(--mute); }
 
 /* trace pages */
 
+main.wide { max-width: 72rem; }
+
 .crumb { margin: 0 0 1.5rem; color: var(--mute); font-size: 0.8rem; }
 
 h1.study {
@@ -558,8 +560,8 @@ pre.prompt, pre.reply {
 
 pre.reply { border-top: 0; max-height: 34rem; overflow: auto; }
 
-.marks, .att { font-size: 0.9rem; letter-spacing: 0.12em; white-space: nowrap; }
-.marks { margin-left: 0.6rem; letter-spacing: 0.1em; }
+.marks, .att { font-size: 0.85rem; letter-spacing: 0.06em; white-space: nowrap; }
+.marks { margin-left: 0.6rem; }
 th.att, td.att { text-align: center; }
 .ok { color: var(--ink); }
 .ko { color: #c4c4c4; }
@@ -592,6 +594,22 @@ details.attempt[open] summary { border-bottom: 1px solid var(--rule); }
 .why { color: var(--mute); }
 .why code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.78rem; color: var(--ink); }
 p.nav { display: flex; justify-content: space-between; gap: 1rem; }
+
+.label { margin: 0.9rem 0 0.3rem; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); }
+.meta-inline { color: var(--mute); font-size: 0.78rem; margin-left: 0.4rem; }
+details.attempt .body { padding: 0.6rem 0.9rem 0.9rem; }
+details.attempt .body pre.reply { border-top: 1px solid var(--rule); }
+details.inner { margin: 0.4rem 0 0; }
+details.inner summary { cursor: pointer; font-size: 0.8rem; color: var(--mute); padding: 0.2rem 0; }
+details.inner pre.prompt, details.inner pre.reply { margin-top: 0.4rem; border-top: 1px solid var(--rule); }
+pre.reasoning { background: #fff; color: #444; }
+
+table.checks { width: auto; font-size: 0.8rem; margin: 0.3rem 0 0.6rem; }
+table.checks td { padding: 0.25rem 0.7rem 0.25rem 0; border-bottom: 0; white-space: normal; }
+table.checks tbody tr:last-child td { border-bottom: 0; }
+table.checks td.mark { width: 1rem; padding-right: 0.4rem; }
+table.checks td.mark.ko { color: var(--ink); }
+table.checks code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.76rem; }
 
 footer {
   margin-top: 5rem;
