@@ -37,15 +37,6 @@ HF_SPACE = "https://huggingface.co/spaces/tirandazdylan/radread-leaderboard"
 HF_DATA = "https://huggingface.co/datasets/tirandazdylan/radread-public-results"
 SITE_REPO = "https://github.com/dylantirandaz/radread-leaderboard"
 
-DISPLAY_SHORT = {
-    "anthropic/claude-opus-5": "Claude Opus 5",
-    "anthropic/claude-fable-5.1": "Claude Fable 5.1",
-    "openai/gpt-6-astra": "GPT-6 Astra",
-    "openai/gpt-5.6-sol": "GPT-5.6 Sol",
-    "google/gemini-3.8-flash": "Gemini 3.8 Flash",
-}
-
-
 def pct(value: float) -> str:
     return f"{value * 100:.1f}"
 
@@ -133,12 +124,14 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     """pass@k for k = 1..max_k, one line per model, as inline SVG.
 
     Drawn by hand rather than with a chart library so the page stays script-free: a light
-    grid, y axis fixed at 0–100 %, circle markers, legend in the right margin.
+    grid, y axis from 0 to at least 60 %, circle markers, legend in the right margin.
     """
     width, height = 720, 340
     left, right, top, bottom = 52, 150, 18, 40  # right margin holds the legend
     plot_w, plot_h = width - left - right, height - top - bottom
-    y_min, y_max = 0.0, 1.0  # full scale, always: the empty top half is part of the result
+    ys = [m[f"pass@{k}"] for m in models for k in range(1, max_k + 1)]
+    y_min = 0.0
+    y_max = max(0.6, min(1.0, (max(ys) * 100 // 10 + 1) * 10 / 100))  # 0-60 %, more only if a line needs it
 
     def sx(k: int) -> float:
         return left + (k - 1) / (max_k - 1) * plot_w
@@ -206,38 +199,6 @@ def reliability(models: list[dict[str, Any]], max_k: int) -> str:
     return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
-def validity_section(audit: dict[str, Any] | None, rollouts: int, tasks: int) -> str:
-    """Audit evidence, rendered only when results/audit.json exists — never invented."""
-    if not audit or not audit.get("blind"):
-        return ""
-    diffs = [d for m in audit["models"] for d in m["saved_vs_current"]]
-    corrected_tasks = len({d["task_id"] for d in diffs})
-    truncated = sum(m["truncated"] for m in audit["models"])
-    blind = ", ".join(
-        f"{DISPLAY_SHORT.get(b['model'], b['model'])} {b['pass_rate'] * 100:.1f}%" for b in audit["blind"]
-    )
-    sens = audit["threshold_sensitivity"]
-    flips20 = sens.get("pass_at_iou_0.20")
-    flips15 = sens.get("pass_at_iou_0.15")
-    lines = [
-        f"Every read re-graded from its saved transcript with the benchmark grader. {truncated} truncated.",
-    ]
-    if diffs:
-        lines.append(
-            f"{len(diffs)} reads on {corrected_tasks} studies score differently than at eval time: one gold "
-            f"correction after the runs (see audit). Nothing else changed."
-        )
-    lines.append(f"Same prompts, no image: {blind}.")
-    if flips20 is not None and flips15 is not None:
-        lines.append(f"Box IoU threshold lowered to 0.20: {flips20} more reads pass; to 0.15: {flips15}.")
-    return f"""
-<section>
-  <h2>Validity</h2>
-  <p>{' '.join(lines)}</p>
-</section>
-"""
-
-
 def repeated_replies(audit: dict[str, Any] | None, models: list[dict[str, Any]]) -> str:
     if not audit:
         return ""
@@ -258,7 +219,6 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
     unsolved_sources = ", ".join(
         f"{count} {source}" for source, count in sorted(unsolved["by_source"].items(), key=lambda kv: -kv[1])
     )
-    validity = validity_section(audit, rollouts, tasks)
     repeats = repeated_replies(audit, models)
     return f"""<!doctype html>
 <html lang="en">
@@ -341,7 +301,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
     <dt>Images</dt><dd>1024 × 1024 px, one per study</dd>
   </dl>
 </section>
-{validity}
+
 <section>
   <h2>Unsolved</h2>
   <p>{unsolved['count']} of {tasks} studies: no model, no attempt. {unsolved_sources}.</p>
@@ -656,7 +616,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=Path("results/leaderboard.json"))
     parser.add_argument("--audit", type=Path, default=Path("results/audit.json"),
-                        help="audit output; the Validity section is omitted when the file is absent")
+                        help="audit output; the repeated-reply count is omitted when the file is absent")
     parser.add_argument("--out", type=Path, default=Path("site"))
     args = parser.parse_args()
 
