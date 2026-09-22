@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RadRead — read_chestdet_multi_64</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<p class='crumb'><a href='../index.html'>RadRead</a> · <a href='index.html'>Traces</a> · read_chestdet_multi_64</p><h1 class='study'>read_chestdet_multi_64</h1><p class='meta'>ChestX-Det · 25 attempts · 7 passed</p><section><h2>Request</h2><pre class='prompt'>Request form: Adult chest film; the form asks: ?normal. Frontal chest film, 1024 x 1024 px.
+
+Findings checklist (answer every key): calcified_focus_present, pneumothorax_present; calcification_boxes is a LIST of boxes, one [x1, y1, x2, y2] per finding you identify - box every one, not only the most obvious.</pre><p class='note'>Radiograph not shown. The model received it (1024 × 1024) with this text.</p></section><section><h2>GPT-6 Astra <span class='marks'><span class='ok'>●</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ok'>●</span></span></h2><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 1 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [422, 449, 452, 488],
+      [414, 496, 442, 522]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified right hilar lymph nodes compatible with healed granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; no pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [426, 450, 452, 486],
+      [415, 496, 440, 522],
+      [452, 542, 477, 571],
+      [763, 574, 783, 594]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Calcified right hilar nodes and a small left pulmonary granuloma; no acute cardiopulmonary abnormality or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [424, 450, 454, 490],
+      [414, 495, 442, 522],
+      [450, 544, 477, 575],
+      [762, 573, 783, 595]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with calcified right hilar nodes and a left pulmonary granuloma.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [426, 450, 454, 486],
+      [416, 497, 438, 519],
+      [208, 886, 220, 901]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease without acute cardiopulmonary abnormality.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Calcified right hilar foci and a punctate calcification over the right lower chest; no focal consolidation, pleural effusion, or pneumothorax.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 5 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [424, 449, 451, 487],
+      [416, 496, 441, 521]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with right hilar calcified foci.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Right hilar calcifications; no pneumothorax or acute cardiopulmonary abnormality.&quot;
+}</pre></details></section><section><h2>Claude Fable 5.1 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [204, 879, 228, 903]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified granuloma at the right lung base; no pneumothorax; heart size at upper limit/mildly enlarged on AP portable projection&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;No pneumothorax or acute pulmonary abnormality; solitary punctate calcified focus right base consistent with an old healed granuloma (benign); borderline cardiomegaly likely magnified by AP portable technique.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [200, 876, 228, 902]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified focus at right lung base/upper abdomen; elevated right hemidiaphragm; no pneumothorax&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;No pneumothorax or acute consolidation; small dense calcified focus at the right base likely benign (granuloma), with elevated right hemidiaphragm, borderline cardiomegaly and necklace artifact - not entirely normal but no acute finding.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: false,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;No calcified focus or pneumothorax; cardiomegaly with elevated right hemidiaphragm, necklace artifact&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;AP portable film with enlarged cardiac silhouette and raised right hemidiaphragm; no pneumothorax and no calcified focus identified; necklace overlies lower neck.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [205, 880, 228, 902]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small dense calcified focus at right lung base/costophrenic region; no pneumothorax; cardiomediastinal silhouette within limits for AP portable technique&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Single small calcified focus right lower chest, likely benign (granuloma); lungs otherwise clear, no pneumothorax, no acute abnormality; necklace artifact.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [204, 880, 226, 902]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Not normal: cardiomegaly with elevated right hemidiaphragm; small calcified focus right upper quadrant&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;AP portable film with cardiomegaly and marked elevation of the right hemidiaphragm; small dense calcified focus projected over the right upper abdomen; no pneumothorax, no consolidation or effusion.&quot;
+}</pre></details></section><section><h2>Claude Opus 5 <span class='marks'><span class='ko'>○</span><span class='ok'>●</span><span class='ok'>●</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [419, 454, 445, 480],
+      [443, 538, 470, 566],
+      [446, 748, 472, 774]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Few small calcified pulmonary granulomas in the right lung, otherwise unremarkable chest; no pneumothorax&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Benign calcified granulomata (old healed granulomatous infection); no acute cardiopulmonary abnormality, no pneumothorax.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 2 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [420, 456, 444, 482],
+      [442, 532, 470, 572]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified granulomata in the right mid lung; no pneumothorax or acute cardiopulmonary abnormality&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Otherwise normal portable AP chest with benign calcified granulomas in the right mid zone; no pneumothorax, consolidation or effusion.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 3 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [418, 452, 447, 482],
+      [443, 536, 472, 566]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Two small calcified granulomas in the right mid lung; no acute cardiopulmonary abnormality&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Benign calcified granulomas right lung; no pneumothorax, consolidation or effusion - otherwise normal chest.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [420, 453, 447, 480],
+      [443, 537, 470, 564],
+      [748, 562, 778, 592]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified pulmonary granulomas (old healed granulomatous disease); no acute cardiopulmonary abnormality&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Few dense calcified foci in the right mid lung and left hilar region consistent with prior granulomatous infection; lungs otherwise clear, no pneumothorax, effusion or consolidation.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [419, 454, 444, 479],
+      [441, 538, 470, 564],
+      [440, 748, 468, 775],
+      [747, 562, 776, 591]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Scattered small calcified pulmonary granulomas (old healed granulomatous disease); no acute cardiopulmonary abnormality&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Several dense calcified nodules in the right mid/lower lung and left mid lung consistent with calcified granulomas; lungs otherwise clear, no pneumothorax, effusion or consolidation; heart size and mediastinum normal for AP portable technique.&quot;
+}</pre></details></section><section><h2>Gemini 3.8 Flash <span class='marks'><span class='ok'>●</span><span class='ok'>●</span><span class='ko'>○</span><span class='ok'>●</span><span class='ko'>○</span></span></h2><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 1 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [414, 438, 444, 472]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified granuloma or calcified hilar lymph node, with mild cardiomegaly&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary disease; benign calcified granuloma/node.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 2 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [414, 438, 442, 472]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified right hilar lymph node, consistent with prior granulomatous exposure&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary disease; calcified right hilar lymph node represents benign prior granulomatous disease.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [202, 866, 210, 873]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Benign calcified granuloma&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 4 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [414, 436, 442, 471]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Cardiomegaly with calcified right hilar granuloma&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Cardiomegaly without acute cardiopulmonary process or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: false,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;Cardiomegaly&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Cardiomegaly without evidence of acute cardiopulmonary process or pneumothorax.&quot;
+}</pre></details></section><section><h2>GPT-5.6 Sol <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: false,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;No acute cardiopulmonary abnormality&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No focal calcified pulmonary opacity or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [593, 575, 609, 591]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Tiny calcified granuloma in the left lower lung; no acute cardiopulmonary abnormality.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No pneumothorax or other acute chest finding; incidental calcified granuloma.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: false,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;No acute cardiopulmonary abnormality.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No focal pulmonary opacity or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [649, 545, 665, 561]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified left lung granuloma; no acute cardiopulmonary abnormality.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No pneumothorax or other acute cardiopulmonary process.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [208, 884, 220, 899]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;No acute cardiopulmonary abnormality; punctate right breast/chest wall calcification.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No pneumothorax or acute pulmonary process; incidental punctate calcified focus projects over the right breast.&quot;
+}</pre></details></section><footer><p class='nav'><a href='read_chestdet_multi_61.html'>← read_chestdet_multi_61</a> · <a href='read_chestdet_multi_66.html'>read_chestdet_multi_66 →</a></p></footer></main></body></html>

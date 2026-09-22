@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RadRead — read_nih_search_2</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<p class='crumb'><a href='../index.html'>RadRead</a> · <a href='index.html'>Traces</a> · read_nih_search_2</p><h1 class='study'>read_nih_search_2</h1><p class='meta'>NIH ChestX-ray14 · 25 attempts · 6 passed</p><section><h2>Request</h2><pre class='prompt'>Request form: 54 F. Breathless for two weeks; the referral asks about an effusion. Frontal chest film, 1024 x 1024 px.
+
+Findings checklist (answer every key): focal_mass_present, pleural_effusion_present, pneumothorax_present, abnormal_side_of_patient (answer a word; sides are the PATIENT&#x27;s left/right, as a radiologist reports them); bounding boxes as [x1, y1, x2, y2] in pixels from the top-left corner: mass_box, effusion_box.</pre><p class='note'>Radiograph not shown. The model received it (1024 × 1024) with this text.</p></section><section><h2>GPT-6 Astra <span class='marks'><span class='ok'>●</span><span class='ok'>●</span><span class='ok'>●</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 1 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: true,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [709, 410, 813, 502],
+    &quot;effusion_box&quot;: [548, 412, 883, 767]
+  },
+  &quot;diagnosis&quot;: &quot;Left lower-zone masslike opacity with a moderate left pleural effusion and adjacent atelectasis.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Suspicious rounded opacity above the left pleural effusion; prompt contrast-enhanced chest CT is recommended. No pneumothorax.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 2 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: true,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [711, 410, 817, 511],
+    &quot;effusion_box&quot;: [586, 402, 883, 771]
+  },
+  &quot;diagnosis&quot;: &quot;Left lower-lung masslike opacity with a moderate left pleural effusion and adjacent basal atelectasis.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Suspicious left lower-lung masslike opacity accompanying the effusion; prompt contrast-enhanced chest CT is recommended.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 3 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: true,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [715, 411, 817, 509],
+    &quot;effusion_box&quot;: [551, 423, 886, 779]
+  },
+  &quot;diagnosis&quot;: &quot;Left lower-zone masslike opacity with a moderate left pleural effusion and adjacent atelectasis.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Urgent contrast-enhanced chest CT is recommended to characterize the masslike opacity and associated effusion.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [536, 412, 882, 762]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with associated basilar atelectasis.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left pleural effusion with left greater than right basilar atelectatic opacities; no discrete mass or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [0, 0, 0, 0],
+    &quot;effusion_box&quot;: [567, 411, 881, 763]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with associated left basilar atelectasis.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left pleural effusion warrants prompt clinical and ultrasound assessment; no discrete focal mass or pneumothorax is identified.&quot;
+}</pre></details></section><section><h2>Claude Fable 5.1 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [570, 470, 880, 830]
+  },
+  &quot;diagnosis&quot;: &quot;Large left pleural effusion obscuring the left hemidiaphragm and lower left hemithorax&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Large left-sided pleural effusion with meniscus and loss of the left hemidiaphragm silhouette; no pneumothorax or discrete lung mass identified; recommend diagnostic thoracentesis/CT to establish cause.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [570, 460, 880, 830]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate-to-large left pleural effusion obscuring the left hemidiaphragm and left heart border&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left-sided pleural effusion with meniscus, no pneumothorax or discrete mass; right lung clear - recommend diagnostic thoracentesis and clinical correlation.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [560, 500, 880, 810]
+  },
+  &quot;diagnosis&quot;: &quot;Large left pleural effusion&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Large left pleural effusion with meniscus obscuring the left hemidiaphragm and lower left lung; no pneumothorax or discrete mass seen, right lung clear.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [560, 470, 880, 800]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion obscuring the left hemidiaphragm&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Homogeneous opacity in the left lower hemithorax with a lateral meniscus and loss of the left hemidiaphragm consistent with a moderate left pleural effusion; right lung clear, no pneumothorax, no focal mass, indwelling tubing along the right chest wall noted.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [570, 440, 880, 800]
+  },
+  &quot;diagnosis&quot;: &quot;Large left pleural effusion&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Large left pleural effusion with meniscus obscuring the left hemidiaphragm and lower zone; no pneumothorax or discrete mass seen (underlying pathology cannot be excluded beneath the fluid) - recommend ultrasound-guided aspiration/analysis and CT after drainage.&quot;
+}</pre></details></section><section><h2>Claude Opus 5 <span class='marks'><span class='ok'>●</span><span class='ko'>○</span><span class='ko'>○</span><span class='ok'>●</span><span class='ko'>○</span></span></h2><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 1 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: true,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [648, 368, 842, 572],
+    &quot;effusion_box&quot;: [560, 520, 908, 800]
+  },
+  &quot;diagnosis&quot;: &quot;Left mid/lower zone mass-like opacity with an associated moderate left pleural effusion — suspected bronchogenic carcinoma with malignant effusion&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate left pleural effusion obscuring the left hemidiaphragm, with an underlying ill-defined left mid/lower zone mass; urgent CT chest and respiratory review with diagnostic/therapeutic pleural aspiration and cytology advised.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [566, 455, 906, 790]
+  },
+  &quot;diagnosis&quot;: &quot;Left-sided pleural effusion with basal veiling opacity and obscured left costophrenic angle/hemidiaphragm; no pneumothorax or discrete mass&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate left pleural effusion causing breathlessness - recommend clinical correlation, ultrasound-guided diagnostic/therapeutic thoracocentesis and fluid analysis; lateral/decubitus or CT if underlying lesion suspected.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [],
+    &quot;effusion_box&quot;: [566, 500, 910, 790]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with basal opacification and blunted costophrenic angle; adjacent left lower-zone consolidation/atelectasis&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left pleural effusion with overlying basal airspace opacity; no pneumothorax or discrete mass — recommend clinical correlation, lateral decubitus/ultrasound and diagnostic thoracentesis.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 4 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: true,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [636, 366, 832, 562],
+    &quot;effusion_box&quot;: [596, 496, 904, 706]
+  },
+  &quot;diagnosis&quot;: &quot;Left mid/lower zone mass-like opacity with obscured left hemidiaphragm and adjacent basal pleural effusion, suspicious for bronchogenic carcinoma with malignant effusion&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left lower zone mass with ipsilateral pleural effusion; no pneumothorax - urgent contrast CT chest and respiratory/oncology referral, consider diagnostic pleural tap.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [560, 480, 910, 730]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with obscured left hemidiaphragm and adjacent basal opacification&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left-sided pleural effusion obscuring the left hemidiaphragm and left lower zone; no pneumothorax or discrete mass identified — recommend clinical correlation and diagnostic/therapeutic thoracocentesis with ultrasound guidance.&quot;
+}</pre></details></section><section><h2>Gemini 3.8 Flash <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [515, 425, 870, 840]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate-to-large left pleural effusion with adjacent compressive atelectasis&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate-to-large left pleural effusion causing compressive atelectasis; diagnostic/therapeutic thoracentesis is recommended.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [512, 438, 863, 856]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate-to-large left pleural effusion with compressive atelectasis&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate-to-large left pleural effusion causing left basilar opacification, for urgent clinical evaluation and consideration of diagnostic/therapeutic thoracentesis.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [504, 425, 856, 834]
+  },
+  &quot;diagnosis&quot;: &quot;Large left pleural effusion with associated compressive atelectasis&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate-to-large left pleural effusion causing progressive dyspnoea, warranting prompt pleural aspiration/drainage and diagnostic workup.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [515, 435, 860, 840]
+  },
+  &quot;diagnosis&quot;: &quot;Large left pleural effusion&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate-to-large left pleural effusion with underlying compressive atelectasis; diagnostic/therapeutic thoracentesis recommended.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: null,
+    &quot;effusion_box&quot;: [515, 435, 865, 840]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate-to-large left pleural effusion with associated compressive atelectasis&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate-to-large left pleural effusion causing compressive atelectasis; consider diagnostic or therapeutic thoracentesis.&quot;
+}</pre></details></section><section><h2>GPT-5.6 Sol <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ok'>●</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [0, 0, 0, 0],
+    &quot;effusion_box&quot;: [540, 425, 915, 855]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with adjacent left basilar atelectatic opacity.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate left pleural effusion; no focal mass or pneumothorax identified.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [],
+    &quot;effusion_box&quot;: [580, 415, 894, 820]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with adjacent left basilar compressive atelectatic opacity.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate left pleural effusion; no pneumothorax or discrete focal mass.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [0, 0, 0, 0],
+    &quot;effusion_box&quot;: [558, 405, 900, 798]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with adjacent left basilar compressive atelectatic opacity.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate left pleural effusion and left basilar atelectatic change; no pneumothorax or discrete focal mass.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:focal_mass_present</code> — value not accepted; <code>box:mass_box</code> — no box given</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: false,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [],
+    &quot;effusion_box&quot;: [590, 410, 900, 785]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with adjacent compressive basilar atelectatic opacity.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate left pleural effusion; no discrete focal mass or pneumothorax.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 5 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;focal_mass_present&quot;: true,
+    &quot;pleural_effusion_present&quot;: true,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;abnormal_side_of_patient&quot;: &quot;left&quot;,
+    &quot;mass_box&quot;: [650, 407, 778, 509],
+    &quot;effusion_box&quot;: [552, 423, 882, 779]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate left pleural effusion with adjacent left lower-lung mass-like opacity and compressive atelectasis.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Moderate left pleural effusion with a suspicious focal left basilar opacity; no pneumothorax.&quot;
+}</pre></details></section><footer><p class='nav'><a href='read_nih_search_1.html'>← read_nih_search_1</a> · <a href='read_nih_search_4.html'>read_nih_search_4 →</a></p></footer></main></body></html>

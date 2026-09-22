@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RadRead — read_nih_ptx_basal</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<p class='crumb'><a href='../index.html'>RadRead</a> · <a href='index.html'>Traces</a> · read_nih_ptx_basal</p><h1 class='study'>read_nih_ptx_basal</h1><p class='meta'>NIH ChestX-ray14 · 25 attempts · 4 passed</p><section><h2>Request</h2><pre class='prompt'>Request form: ICU portable film. Tracheostomy in situ; desaturation overnight; the request asks about tube position. Frontal chest film, 1024 x 1024 px.
+
+Findings checklist (answer every key): pneumothorax_present, tracheostomy_present, pneumothorax_side_of_patient (answer a word; sides are the PATIENT&#x27;s left/right, as a radiologist reports them); bounding boxes as [x1, y1, x2, y2] in pixels from the top-left corner: pneumothorax_box.</pre><p class='note'>Radiograph not shown. The model received it (1024 × 1024) with this text.</p></section><section><h2>GPT-6 Astra <span class='marks'><span class='ok'>●</span><span class='ok'>●</span><span class='ko'>○</span><span class='ok'>●</span><span class='ok'>●</span></span></h2><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 1 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [286, 636, 416, 735]
+  },
+  &quot;diagnosis&quot;: &quot;Loculated right basilar hydropneumothorax with adjacent atelectasis.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Right basilar pleural air with pleural drains in place, without tension features; tracheostomy projects within the trachea.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 2 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [200, 632, 425, 805]
+  },
+  &quot;diagnosis&quot;: &quot;Loculated right basilar hydropneumothorax with a right chest drain in situ.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Right basilar pleural air and fluid despite an indwelling drain; urgently assess drain function. Tracheostomy projects in the expected position.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [202, 548, 423, 816]
+  },
+  &quot;diagnosis&quot;: &quot;Loculated right basilar hydropneumothorax despite an indwelling right chest tube.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Right basilar pleural air and fluid with adjacent atelectasis, without mediastinal shift. Tracheostomy projects over the upper trachea; urgently review chest drain function.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 4 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [285, 637, 415, 733]
+  },
+  &quot;diagnosis&quot;: &quot;Loculated right basilar hydropneumothorax with right chest drains in situ.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tip projects over the upper thoracic trachea. Right basilar pneumothorax with adjacent pleural fluid and atelectasis, without tension features; assess chest drain function.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 5 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [280, 640, 415, 738]
+  },
+  &quot;diagnosis&quot;: &quot;Small loculated right basilar hydropneumothorax with a right chest drain in situ.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy projects over the tracheal air column. Right basilar pneumothorax without tension features; review chest drain function.&quot;
+}</pre></details></section><section><h2>Claude Fable 5.1 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:pneumothorax_present</code> — value not accepted; <code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — no box given; <code>diagnosis</code> — diagnosis not in the accepted set; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: false,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;none&quot;,
+    &quot;pneumothorax_box&quot;: null
+  },
+  &quot;diagnosis&quot;: &quot;Tracheostomy tube in satisfactory midline position above the carina; no pneumothorax&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube well positioned; both lungs inflated with vascular markings to the periphery and no visceral pleural line, so no pneumothorax to explain desaturation; elevated right hemidiaphragm with mild right basal volume loss and monitoring leads/lines noted.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [250, 170, 490, 560]
+  },
+  &quot;diagnosis&quot;: &quot;Right-sided pneumothorax in a tracheostomised ICU patient; tracheostomy tube midline in the trachea&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Right apical/lateral pneumothorax with visceral pleural line and absent peripheral lung markings, with dense right lower zone opacity; tracheostomy tube satisfactorily positioned - urgent clinical review and chest drain consideration.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;left&quot;,
+    &quot;pneumothorax_box&quot;: [790, 250, 905, 650]
+  },
+  &quot;diagnosis&quot;: &quot;Left pneumothorax in a tracheostomised ICU patient; tracheostomy tube midline in the trachea&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube in satisfactory midline position; left lateral/apical pneumothorax with peripheral lucency and depressed left hemidiaphragm in a ventilated patient with desaturation - urgent clinical correlation and chest drain consideration; right upper zone volume loss/atelectasis with elevated right hemidiaphragm.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;left&quot;,
+    &quot;pneumothorax_box&quot;: [790, 260, 960, 720]
+  },
+  &quot;diagnosis&quot;: &quot;Left pneumothorax with tracheostomy tube in situ&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube in place; left-sided pneumothorax with lucent pleural space lateral to the left lung edge and rightward mediastinal shift - likely cause of desaturation, needs urgent chest drain.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;left&quot;,
+    &quot;pneumothorax_box&quot;: [820, 330, 905, 700]
+  },
+  &quot;diagnosis&quot;: &quot;Left-sided pneumothorax in a tracheostomised ICU patient; tracheostomy tube midline in the trachea&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Thin lucent rim without lung markings along the lateral left hemithorax consistent with a left pneumothorax; tracheostomy tube satisfactorily positioned in the midline trachea; multiple lines/leads overlie the chest - clinical correlation and consideration of chest drain given desaturation on positive-pressure ventilation.&quot;
+}</pre></details></section><section><h2>Claude Opus 5 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;left&quot;,
+    &quot;pneumothorax_box&quot;: [815, 190, 995, 710]
+  },
+  &quot;diagnosis&quot;: &quot;Left pneumothorax in a ventilated ICU patient with tracheostomy in satisfactory midline position&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube tip projects in the midline trachea above the carina; there is a left-sided pneumothorax with lateral/apical lucency and absent peripheral vascular markings, accounting for the overnight desaturation — notify the ICU team immediately for chest drain consideration.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [228, 150, 472, 402]
+  },
+  &quot;diagnosis&quot;: &quot;Right apical/upper zone pneumothorax in a ventilated patient with tracheostomy tube in satisfactory midline position&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube tip adequately sited in mid trachea; new right-sided pneumothorax accounts for overnight desaturation - urgent decompression/chest drain advised.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [196, 128, 470, 432]
+  },
+  &quot;diagnosis&quot;: &quot;Right apical/upper zone pneumothorax in a ventilated patient with tracheostomy in satisfactory midline position&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube tip projects in the mid trachea above the carina; new right-sided pneumothorax accounts for the overnight desaturation — needs immediate clinical review for chest drain.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;left&quot;,
+    &quot;pneumothorax_box&quot;: [838, 262, 1006, 742]
+  },
+  &quot;diagnosis&quot;: &quot;Left-sided pneumothorax in a ventilated tracheostomy patient with acute desaturation; tracheostomy tube tip in midline trachea above the carina&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Left pneumothorax accounting for overnight desaturation — needs immediate clinical review/decompression; tracheostomy tube is satisfactorily positioned.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;left&quot;,
+    &quot;pneumothorax_box&quot;: [812, 252, 982, 712]
+  },
+  &quot;diagnosis&quot;: &quot;Left-sided pneumothorax in a ventilated ICU patient with tracheostomy in satisfactory midline position&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube tip projects in midline trachea above the carina; there is a moderate left pneumothorax with a visible visceral pleural line laterally, accounting for the overnight desaturation - urgent chest drain/decompression required.&quot;
+}</pre></details></section><section><h2>Gemini 3.8 Flash <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [195, 160, 360, 520]
+  },
+  &quot;diagnosis&quot;: &quot;Right-sided pneumothorax with subcutaneous emphysema and tracheostomy in situ&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Right pneumothorax and extensive right-sided subcutaneous emphysema in the setting of an indwelling right chest tube and tracheostomy.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:pneumothorax_present</code> — value not accepted; <code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: false,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;none&quot;,
+    &quot;pneumothorax_box&quot;: [0, 0, 0, 0]
+  },
+  &quot;diagnosis&quot;: &quot;Tracheostomy in satisfactory position with bilateral interstitial opacities and no pneumothorax&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube terminates appropriately in the mid trachea without evidence of pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:pneumothorax_present</code> — value not accepted; <code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: false,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;none&quot;,
+    &quot;pneumothorax_box&quot;: [0, 0, 0, 0]
+  },
+  &quot;diagnosis&quot;: &quot;Satisfactory tracheostomy tube position without pneumothorax; right basilar atelectasis&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube tip positioned appropriately in the mid trachea without evidence of pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:pneumothorax_present</code> — value not accepted; <code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: false,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;none&quot;,
+    &quot;pneumothorax_box&quot;: [0, 0, 0, 0]
+  },
+  &quot;diagnosis&quot;: &quot;No pneumothorax; tracheostomy tube well-positioned in the mid-trachea&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube in satisfactory position without evidence of pneumothorax or other acute complication.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:pneumothorax_present</code> — value not accepted; <code>finding:pneumothorax_side_of_patient</code> — value not accepted; <code>box:pneumothorax_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: false,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;none&quot;,
+    &quot;pneumothorax_box&quot;: [0, 0, 0, 0]
+  },
+  &quot;diagnosis&quot;: &quot;No pneumothorax; tracheostomy tube in situ with colonic interposition (Chilaiditi sign) under the right hemidiaphragm&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Tracheostomy tube appropriately positioned above the carina without evidence of pneumothorax or acute focal consolidation.&quot;
+}</pre></details></section><section><h2>GPT-5.6 Sol <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [158, 145, 478, 749]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate right pneumothorax with right basilar pleural fluid and atelectatic change; tracheostomy tip projects within the upper trachea.&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Right hydropneumothorax despite pleural drainage; immediately assess the drain system and patient.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [112, 139, 449, 797]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate right pneumothorax with pleural drain in situ.&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Persistent right pneumothorax; tracheostomy tip projects within the upper thoracic trachea.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [230, 150, 480, 770]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate right pneumothorax with right pleural drain in situ; tracheostomy tip projects within the trachea.&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Persistent moderate right pneumothorax despite pleural drainage, requiring immediate drain assessment.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [120, 115, 475, 775]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate right hydropneumothorax; tracheostomy tip projects within the upper thoracic trachea.&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Moderate right pneumothorax with pleural fluid, requiring immediate clinical and pleural drain assessment.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box:pneumothorax_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pneumothorax_present&quot;: true,
+    &quot;tracheostomy_present&quot;: true,
+    &quot;pneumothorax_side_of_patient&quot;: &quot;right&quot;,
+    &quot;pneumothorax_box&quot;: [173, 130, 370, 520]
+  },
+  &quot;diagnosis&quot;: &quot;Moderate right hydropneumothorax with satisfactory intratracheal tracheostomy position.&quot;,
+  &quot;next_step&quot;: &quot;emergency_action&quot;,
+  &quot;impression&quot;: &quot;Moderate right pneumothorax with basilar pleural fluid and atelectatic change; urgent pleural drain assessment is required.&quot;
+}</pre></details></section><footer><p class='nav'><a href='read_nih_nodule_8.html'>← read_nih_nodule_8</a> · <a href='read_nih_search_1.html'>read_nih_search_1 →</a></p></footer></main></body></html>

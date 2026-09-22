@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RadRead — read_chestdet_multi_6</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<p class='crumb'><a href='../index.html'>RadRead</a> · <a href='index.html'>Traces</a> · read_chestdet_multi_6</p><h1 class='study'>read_chestdet_multi_6</h1><p class='meta'>ChestX-Det · 25 attempts · 0 passed</p><section><h2>Request</h2><pre class='prompt'>Request form: Adult chest film; the form asks: ?normal. Frontal chest film, 1024 x 1024 px.
+
+Findings checklist (answer every key): calcified_focus_present, pulmonary_nodules_present; calcification_boxes is a LIST of boxes, one [x1, y1, x2, y2] per finding you identify - box every one, not only the most obvious.</pre><p class='note'>Radiograph not shown. The model received it (1024 × 1024) with this text.</p></section><section><h2>GPT-6 Astra <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [300, 371, 318, 389],
+      [290, 478, 309, 497],
+      [359, 597, 384, 621]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple calcified right lung granulomas consistent with healed granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Three benign calcified right pulmonary nodules; no acute cardiopulmonary abnormality.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [299, 370, 319, 389],
+      [290, 478, 309, 497],
+      [394, 552, 411, 572],
+      [358, 597, 385, 622]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple calcified right pulmonary granulomas, consistent with healed granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Benign calcified right lung nodules; no acute cardiopulmonary abnormality.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [299, 370, 321, 391],
+      [289, 477, 310, 498],
+      [359, 597, 385, 621]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with multiple calcified right pulmonary nodules.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Benign calcified right lung granulomas; no acute cardiopulmonary abnormality.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [299, 371, 320, 391],
+      [289, 477, 310, 498],
+      [359, 597, 384, 621]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with three calcified right pulmonary nodules.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Three benign calcified right lung granulomas. No acute cardiopulmonary abnormality.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [299, 370, 320, 389],
+      [291, 478, 308, 496],
+      [359, 597, 385, 621]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple calcified right pulmonary granulomas consistent with healed granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Three calcified right lung nodules. No acute cardiopulmonary abnormality.&quot;
+}</pre></details></section><section><h2>Claude Fable 5.1 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [280, 470, 306, 496],
+      [356, 592, 384, 618]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified granulomas in the right lung; otherwise no acute abnormality&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Two small dense calcified foci in the right mid and lower zones consistent with old healed granulomatous disease; elevated right hemidiaphragm; no active consolidation, effusion or non-calcified nodule.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [288, 474, 314, 498],
+      [356, 592, 386, 620],
+      [672, 476, 704, 506]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified granulomata in the right lung with probable calcified left hilar node; no active disease&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Not entirely normal: several tiny dense calcified foci (right mid and lower zones, left hilum) consistent with old healed granulomatous disease; lungs otherwise clear, heart size and mediastinum normal, no consolidation, effusion or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [284, 468, 310, 494],
+      [358, 594, 384, 620]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small dense calcified nodules right mid and lower zones, likely old granulomas; elevated right hemidiaphragm&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Two small calcified pulmonary nodules in the right lung consistent with healed granulomatous disease; no acute consolidation, effusion or pneumothorax; elevated right hemidiaphragm.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [286, 470, 312, 496],
+      [358, 592, 388, 622],
+      [675, 472, 703, 500]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple small dense calcified pulmonary nodules (calcified granulomas), with elevated right hemidiaphragm&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Not normal: several small densely calcified nodules in the right mid/lower zone and left perihilar region consistent with old granulomatous disease; marked right hemidiaphragm elevation; no acute consolidation, effusion or pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [284, 470, 312, 498],
+      [358, 590, 388, 620],
+      [658, 470, 690, 500]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple small calcified pulmonary granulomas (right mid and lower zones, left hilar) with elevated right hemidiaphragm; no active disease&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Not normal but benign: scattered small calcified granulomas in the right lung and left hilum, likely old healed granulomatous infection; raised right hemidiaphragm; no acute consolidation, effusion or suspicious mass.&quot;
+}</pre></details></section><section><h2>Claude Opus 5 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [354, 592, 383, 621],
+      [288, 476, 307, 495],
+      [291, 374, 310, 393],
+      [675, 482, 697, 505]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified pulmonary granulomas (old healed granulomatous infection); otherwise normal chest&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Several sharply marginated dense calcified nodules, predominantly right lung with one left perihilar focus, consistent with healed granulomas; lungs otherwise clear with normal heart, mediastinum and diaphragms - no acute abnormality.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [348, 590, 384, 626],
+      [284, 469, 310, 495]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Small dense calcified granulomas in the right lung; otherwise normal chest&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Benign calcified granulomata (old healed granulomatous infection) in right lung; no active disease, heart and mediastinum normal, no effusion or consolidation.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [285, 367, 314, 394],
+      [284, 473, 312, 501],
+      [353, 589, 386, 622],
+      [682, 477, 710, 504]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple small densely calcified pulmonary nodules (calcified granulomas) in both lungs, otherwise normal chest&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Benign-appearing calcified granulomas from prior healed granulomatous infection; no active pulmonary disease, no effusion or mass.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [350, 591, 383, 623],
+      [284, 474, 308, 498],
+      [677, 479, 703, 503]
+    ],
+    &quot;lung_fields_otherwise_clear&quot;: true,
+    &quot;pleural_effusion_present&quot;: false,
+    &quot;pneumothorax_present&quot;: false,
+    &quot;mediastinum_normal&quot;: true,
+    &quot;cardiac_size_normal&quot;: true,
+    &quot;bones_normal&quot;: true
+  },
+  &quot;diagnosis&quot;: &quot;Small densely calcified pulmonary nodules (calcified granulomas) in both lungs, otherwise normal chest film&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Benign calcified granulomata; no active cardiopulmonary disease.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [352, 594, 383, 624],
+      [285, 473, 304, 493],
+      [291, 371, 310, 390],
+      [677, 481, 698, 503],
+      [678, 541, 700, 563]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple small dense calcified pulmonary nodules (granulomas) in both lungs, otherwise clear lungs and normal heart/mediastinum&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Not entirely normal: several sharply marginated calcified nodules consistent with old healed granulomatous infection; no active disease, no acute findings.&quot;
+}</pre></details></section><section><h2>Gemini 3.8 Flash <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcification_boxes&quot;: [
+      [287, 361, 311, 379],
+      [281, 467, 304, 486],
+      [348, 581, 374, 604]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified pulmonary granulomas, right lung&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Multiple benign-appearing calcified granulomas in the right lung, likely representing prior healed granulomatous infection; no acute cardiopulmonary process.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [289, 360, 311, 377],
+      [281, 468, 302, 484],
+      [348, 581, 376, 605]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Benign calcified granulomas in the right lung&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Multiple well-defined calcified granulomas in the right lung, benign and requiring no further follow-up.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [290, 360, 311, 377],
+      [281, 467, 298, 484],
+      [348, 583, 374, 604]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified granulomas, right lung&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Multiple benign calcified pulmonary granulomas within the right lung without active cardiopulmonary disease.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [580, 346, 606, 377]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granuloma in the right lung&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Benign calcified granuloma in the right lung, with no acute cardiopulmonary process.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [290, 359, 312, 377],
+      [281, 467, 304, 488],
+      [347, 582, 373, 605]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease (calcified pulmonary granulomas)&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Multiple calcified granulomas in the right lung consistent with prior healed granulomatous infection, with no acute cardiopulmonary disease.&quot;
+}</pre></details></section><section><h2>GPT-5.6 Sol <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [307, 369, 326, 386],
+      [287, 476, 309, 498],
+      [356, 596, 383, 622]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple calcified right pulmonary granulomas from prior granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; multiple benign calcified right lung granulomas.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [306, 370, 325, 388],
+      [287, 477, 308, 498],
+      [355, 596, 381, 621]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple benign calcified right pulmonary granulomas from remote granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; multiple calcified right lung granulomas.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [302, 369, 320, 386],
+      [289, 478, 310, 498],
+      [356, 599, 379, 622]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple calcified right pulmonary granulomas from prior granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; multiple benign calcified granulomas in the right lung.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [305, 370, 325, 390],
+      [288, 445, 307, 464],
+      [357, 596, 383, 620]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple calcified right pulmonary granulomas from prior granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; multiple benign calcified right lung granulomas.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;calcified_focus_present&quot;: true,
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [303, 369, 321, 386],
+      [289, 445, 307, 464],
+      [357, 597, 381, 619]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Multiple calcified right pulmonary granulomas from prior granulomatous disease.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; multiple benign calcified right lung granulomas.&quot;
+}</pre></details></section><footer><p class='nav'><a href='read_chestdet_multi_58.html'>← read_chestdet_multi_58</a> · <a href='read_chestdet_multi_60.html'>read_chestdet_multi_60 →</a></p></footer></main></body></html>

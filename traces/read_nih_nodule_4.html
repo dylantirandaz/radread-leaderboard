@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RadRead — read_nih_nodule_4</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<p class='crumb'><a href='../index.html'>RadRead</a> · <a href='index.html'>Traces</a> · read_nih_nodule_4</p><h1 class='study'>read_nih_nodule_4</h1><p class='meta'>NIH ChestX-ray14 · 25 attempts · 9 passed</p><section><h2>Request</h2><pre class='prompt'>Request form: 72 F. ICU portable film after line placement; the request asks about line position. Frontal chest film, 1024 x 1024 px.
+
+Findings checklist (answer every key): pulmonary_nodule_present, nodule_side_of_patient (answer a word; sides are the PATIENT&#x27;s left/right, as a radiologist reports them); bounding boxes as [x1, y1, x2, y2] in pixels from the top-left corner: nodule_box.</pre><p class='note'>Radiograph not shown. The model received it (1024 × 1024) with this text.</p></section><section><h2>GPT-6 Astra <span class='marks'><span class='ok'>●</span><span class='ko'>○</span><span class='ok'>●</span><span class='ok'>●</span><span class='ok'>●</span></span></h2><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 1 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [357, 753, 376, 774]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified right basilar pulmonary nodule, likely granuloma; indeterminate left-sided central catheter position.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left-sided central catheter descends along the left mediastinum; confirm venous placement before use. No pneumothorax. Small right basilar calcified nodule.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — box does not match the finding</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;left&quot;,
+    &quot;nodule_box&quot;: [696, 346, 746, 407]
+  },
+  &quot;diagnosis&quot;: &quot;Left upper lobe pulmonary nodule.&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Left upper lobe nodule warrants chest CT characterization. No pneumothorax.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 3 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [355, 752, 375, 774]
+  },
+  &quot;diagnosis&quot;: &quot;Small calcified-appearing right basilar pulmonary nodule; atypical left-sided central catheter course.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left-sided central catheter descends along the left mediastinal border; confirm venous placement before use. No pneumothorax. Small right basilar nodule likely represents a granuloma.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 4 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [355, 752, 377, 775]
+  },
+  &quot;diagnosis&quot;: &quot;Small dense right basilar pulmonary nodule, likely a calcified granuloma.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Right basilar nodule; the left-sided central catheter follows an atypical left mediastinal course—confirm venous position before use.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 5 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [356, 752, 377, 775]
+  },
+  &quot;diagnosis&quot;: &quot;Small dense right basilar pulmonary nodule, likely a calcified granuloma.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Right IJ catheter tip overlies the SVC. Left chest port catheter follows an atypical left mediastinal course, possibly a persistent left SVC; confirm venous position before use. No pneumothorax.&quot;
+}</pre></details></section><section><h2>Claude Fable 5.1 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:pulmonary_nodule_present</code> — value not accepted; <code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — no box given; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: false,
+    &quot;nodule_side_of_patient&quot;: &quot;none&quot;,
+    &quot;nodule_box&quot;: null
+  },
+  &quot;diagnosis&quot;: &quot;Post central line placement; no pulmonary nodule, no pneumothorax&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Rotated portable film; left-sided central venous catheter courses toward the mediastinum with tip projecting over the SVC/cavoatrial region; no pneumothorax. Round densities over the upper chest are external ECG electrodes/snap connectors and monitoring leads, not pulmonary nodules. Enlarged cardiac silhouette and elevated left hemidiaphragm with left basal opacity, likely atelectasis/effusion.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:pulmonary_nodule_present</code> — value not accepted; <code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — no box given; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: false,
+    &quot;nodule_side_of_patient&quot;: &quot;none&quot;,
+    &quot;nodule_box&quot;: null
+  },
+  &quot;diagnosis&quot;: &quot;No pulmonary nodule; rounded densities correspond to ECG electrodes and side marker, not parenchymal lesions&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Rotated portable ICU film with multiple lines and ECG leads; no discrete pulmonary nodule, no pneumothorax or large effusion identified; line courses toward the mediastinum without evident malposition.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:pulmonary_nodule_present</code> — value not accepted; <code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — no box given; <code>diagnosis</code> — diagnosis not in the accepted set; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: false,
+    &quot;nodule_side_of_patient&quot;: &quot;none&quot;,
+    &quot;nodule_box&quot;: null
+  },
+  &quot;diagnosis&quot;: &quot;Left-sided central venous catheter with tip projecting over the lower SVC/cavoatrial junction; no pneumothorax&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Satisfactory line position without pneumothorax or mediastinal widening; no pulmonary nodule identified (round densities are external ECG electrodes/monitoring hardware)&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:pulmonary_nodule_present</code> — value not accepted; <code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — no box given; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: false,
+    &quot;nodule_side_of_patient&quot;: &quot;none&quot;,
+    &quot;nodule_box&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;No pulmonary nodule; rotated portable film with central venous catheter descending along the right mediastinal border, tip projecting low over the cavoatrial junction/right atrium; multiple overlying external lines and ECG electrodes (rounded densities are electrodes, not nodules)&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;No nodule; central line tip appears low (cavoatrial junction/right atrium) on a rotated film - clinical correlation and consideration of retraction advised; no pneumothorax identified.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:pulmonary_nodule_present</code> — value not accepted; <code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — no box given; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: false,
+    &quot;nodule_side_of_patient&quot;: &quot;none&quot;,
+    &quot;nodule_box&quot;: null
+  },
+  &quot;diagnosis&quot;: &quot;No pulmonary nodule; rounded opacities in the left upper zone and right mid zone are ECG electrodes with attached leads (external monitoring hardware), not lung nodules&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Rotated portable ICU film with multiple external monitoring leads and electrodes projecting over the chest; no discrete pulmonary nodule, no pneumothorax or large effusion identified; no intrathoracic line malposition evident on this projection.&quot;
+}</pre></details></section><section><h2>Claude Opus 5 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;left&quot;,
+    &quot;nodule_box&quot;: [744, 437, 818, 512]
+  },
+  &quot;diagnosis&quot;: &quot;Central venous catheter in place with satisfactory course; incidental ~2 cm rounded nodular opacity in the left mid lung zone&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Line position acceptable, but an unexpected left mid-zone pulmonary nodule requires dedicated CT chest and clinical correlation.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;left&quot;,
+    &quot;nodule_box&quot;: [660, 180, 762, 277]
+  },
+  &quot;diagnosis&quot;: &quot;Rounded nodular opacity in the left upper zone on a rotated ICU portable film; support lines/ECG leads overlie the chest, no malpositioned catheter tip or pneumothorax identified&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left upper zone pulmonary nodule requires dedicated CT for characterisation; line/lead positions otherwise unremarkable.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box:nodule_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [419, 228, 497, 306]
+  },
+  &quot;diagnosis&quot;: &quot;Indwelling central venous catheter/port with satisfactory course; incidental ~2 cm rounded nodular opacity in the right upper zone&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Line appears appropriately sited, but an unexpected right upper lobe nodule is present and warrants CT chest correlation.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;left&quot;,
+    &quot;nodule_box&quot;: [763, 458, 838, 533]
+  },
+  &quot;diagnosis&quot;: &quot;Incidental rounded nodular opacity in the left mid/upper lung zone on a portable post-line-placement film; support lines/leads overlie the chest, no pneumothorax or malpositioned catheter tip identified&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Left mid-lung nodule (~7 cm from midline, retro-clavicular level) requires dedicated CT chest for characterisation; lines appear satisfactorily sited with no pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:nodule_side_of_patient</code> — value not accepted; <code>box:nodule_box</code> — box does not match the finding; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;left&quot;,
+    &quot;nodule_box&quot;: [745, 413, 818, 487]
+  },
+  &quot;diagnosis&quot;: &quot;Indwelling central venous catheter/leads with a solitary rounded nodular opacity in the left mid/upper lung zone, unrelated to the line question&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Support lines in situ without evident malposition; incidental ~7 cm-deep rounded left mid-zone pulmonary nodule requires dedicated CT correlation.&quot;
+}</pre></details></section><section><h2>Gemini 3.8 Flash <span class='marks'><span class='ok'>●</span><span class='ok'>●</span><span class='ok'>●</span><span class='ok'>●</span><span class='ok'>●</span></span></h2><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 1 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [336, 731, 368, 763]
+  },
+  &quot;diagnosis&quot;: &quot;Right lower lobe pulmonary nodule&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Solitary pulmonary nodule in the right lower lung base, warranting comparison with prior studies or follow-up chest CT; right IJ central venous line is appropriately positioned.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 2 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [338, 733, 362, 758]
+  },
+  &quot;diagnosis&quot;: &quot;Right lower lobe pulmonary nodule&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Solitary pulmonary nodule in the right lower lung zone; comparison with prior imaging or follow-up chest CT recommended once clinically stable.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 3 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [340, 732, 366, 758]
+  },
+  &quot;diagnosis&quot;: &quot;Right lower lobe pulmonary nodule&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Solitary well-circumscribed non-calcified nodule in the right lower lung base, recommend comparison with prior imaging or dedicated chest CT upon stabilization.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 4 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [335, 730, 365, 760]
+  },
+  &quot;diagnosis&quot;: &quot;Solitary pulmonary nodule in the right lower lobe&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Well-circumscribed nodule in the right lower lung base; comparison with prior imaging or outpatient CT follow-up recommended once acute illness resolves.&quot;
+}</pre></details><details class='attempt pass'><summary><span class='tag pass'>pass</span> attempt 5 <span class='why'>every check passed</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [338, 733, 362, 757]
+  },
+  &quot;diagnosis&quot;: &quot;Solitary pulmonary nodule, right lower lung, likely granuloma&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Incidental small well-circumscribed pulmonary nodule in the right lower lung base; compare with prior chest imaging to confirm stability.&quot;
+}</pre></details></section><section><h2>GPT-5.6 Sol <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [364, 747, 382, 767]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified right basilar pulmonary granuloma.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Right IJ central line tip projects over the SVC; no pneumothorax, with a benign calcified right basilar granuloma.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [360, 741, 379, 762]
+  },
+  &quot;diagnosis&quot;: &quot;Right IJ central line tip projects over the SVC without pneumothorax; small calcified right basilar granuloma.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Support devices are satisfactorily positioned; no postprocedural pneumothorax.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [362, 749, 383, 771]
+  },
+  &quot;diagnosis&quot;: &quot;Right IJ central venous catheter tip in the SVC without pneumothorax; small calcified right basilar granuloma.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Support devices are appropriately positioned with no line-placement complication.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [363, 746, 383, 768]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified right lower-lung granuloma.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Right IJ central line tip projects over the upper SVC; no pneumothorax; small calcified right basilar granuloma.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodule_present&quot;: true,
+    &quot;nodule_side_of_patient&quot;: &quot;right&quot;,
+    &quot;nodule_box&quot;: [367, 752, 384, 770]
+  },
+  &quot;diagnosis&quot;: &quot;Right IJ central venous catheter tip projects over the upper SVC; small calcified right basilar granuloma.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Right IJ line terminates in the upper SVC without pneumothorax.&quot;
+}</pre></details></section><footer><p class='nav'><a href='read_nih_nodule_24.html'>← read_nih_nodule_24</a> · <a href='read_nih_nodule_8.html'>read_nih_nodule_8 →</a></p></footer></main></body></html>

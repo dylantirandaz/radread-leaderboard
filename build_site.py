@@ -126,6 +126,60 @@ def source_table(models: list[dict[str, Any]], max_k: int) -> str:
     return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
+PALETTE = ["#111111", "#3b6fd1", "#d9822b", "#3a9a5b", "#9b4fa0", "#8a8a8a"]
+
+
+def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
+    """pass@k for k = 1..max_k, one line per model, as inline SVG.
+
+    Drawn by hand rather than with a chart library so the page stays script-free: a light
+    grid, y axis in percent, circle markers, legend in the right margin.
+    """
+    width, height = 720, 340
+    left, right, top, bottom = 52, 150, 18, 40  # right margin holds the legend
+    plot_w, plot_h = width - left - right, height - top - bottom
+    ys = [m[f"pass@{k}"] for m in models for k in range(1, max_k + 1)]
+    y_max = min(1.0, (max(ys) * 100 // 10 + 1) * 10 / 100)  # next 10 % above the top line
+    y_min = max(0.0, (min(ys) * 100 // 10) * 10 / 100)      # 10 % below the bottom line
+    if y_max - y_min < 0.2:
+        y_min = max(0.0, y_max - 0.2)
+
+    def sx(k: int) -> float:
+        return left + (k - 1) / (max_k - 1) * plot_w
+
+    def sy(v: float) -> float:
+        return top + (1 - (v - y_min) / (y_max - y_min)) * plot_h
+
+    parts = [f'<svg class="chart" viewBox="0 0 {width} {height}" role="img" aria-label="pass@k by model">']
+    step = 0.1 if y_max - y_min > 0.3 else 0.05
+    tick = y_min
+    while tick <= y_max + 1e-9:
+        y = sy(tick)
+        parts.append(f'<line x1="{left}" y1="{y:.1f}" x2="{left + plot_w}" y2="{y:.1f}" class="grid"/>')
+        parts.append(f'<text x="{left - 8}" y="{y + 4:.1f}" class="tick" text-anchor="end">{tick * 100:.0f}%</text>')
+        tick += step
+    for k in range(1, max_k + 1):
+        x = sx(k)
+        parts.append(f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{top + plot_h}" class="grid"/>')
+        parts.append(f'<text x="{x:.1f}" y="{top + plot_h + 18}" class="tick" text-anchor="middle">{k}</text>')
+    parts.append(f'<text x="{left + plot_w / 2:.1f}" y="{height - 6}" class="tick" text-anchor="middle">k attempts</text>')
+    parts.append(f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" class="frame"/>')
+    for index, model in enumerate(models):
+        colour = PALETTE[index % len(PALETTE)]
+        points = [(sx(k), sy(model[f"pass@{k}"])) for k in range(1, max_k + 1)]
+        path = " ".join(f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(points))
+        parts.append(f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="1.6"/>')
+        for x, y in points:
+            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" fill="{colour}"/>')
+        ly = top + 8 + index * 17
+        lx = left + plot_w + 18
+        parts.append(f'<line x1="{lx}" y1="{ly}" x2="{lx + 20}" y2="{ly}" stroke="{colour}" stroke-width="1.6"/>')
+        parts.append(f'<circle cx="{lx + 10}" cy="{ly}" r="3" fill="{colour}"/>')
+        parts.append(f'<text x="{lx + 28}" y="{ly + 4}" class="legend">{html.escape(model["name"])}</text>')
+    parts.append("</svg>")
+    return "".join(parts)
+
+
 def reliability(models: list[dict[str, Any]], max_k: int) -> str:
     """One rule per model, split into never / sometimes / always solved."""
     rows = []
@@ -160,23 +214,40 @@ def validity_section(audit: dict[str, Any] | None, rollouts: int, tasks: int) ->
     """Audit evidence, rendered only when results/audit.json exists — never invented."""
     if not audit or not audit.get("blind"):
         return ""
-    mismatches = sum(len(m["regrade_mismatches"]) for m in audit["models"])
+    diffs = [d for m in audit["models"] for d in m["saved_vs_current"]]
+    corrected_tasks = len({d["task_id"] for d in diffs})
     truncated = sum(m["truncated"] for m in audit["models"])
-    blind = " and ".join(
-        f"{b['pass_rate'] * 100:.1f}% for {DISPLAY_SHORT.get(b['model'], b['model'])}" for b in audit["blind"]
+    blind = ", ".join(
+        f"{DISPLAY_SHORT.get(b['model'], b['model'])} {b['pass_rate'] * 100:.1f}%" for b in audit["blind"]
     )
     sens = audit["threshold_sensitivity"]
-    flips = sens.get("best_iou_0.20_0.25", 0)
+    flips20 = sens.get("pass_at_iou_0.20")
+    flips15 = sens.get("pass_at_iou_0.15")
+    lines = [
+        f"Every read re-graded from its saved transcript with the benchmark grader. {truncated} truncated.",
+    ]
+    if diffs:
+        lines.append(
+            f"{len(diffs)} reads on {corrected_tasks} studies score differently than at eval time: one gold "
+            f"correction after the runs (see audit). Nothing else changed."
+        )
+    lines.append(f"Same prompts, no image: {blind}.")
+    if flips20 is not None and flips15 is not None:
+        lines.append(f"Box IoU threshold lowered to 0.20: {flips20} more reads pass; to 0.15: {flips15}.")
     return f"""
 <section>
   <h2>Validity</h2>
-  <p>Every transcript was re-graded independently after the runs: {rollouts - mismatches:,} of
-  {rollouts:,} rewards reproduce, {truncated} truncated. With the radiograph withheld, the same
-  {tasks} prompts pass {blind} — the checklist does not give the finding away. Box
-  failures are misses, not near misses: loosening the IoU threshold to 0.20 would change
-  {flips} read{'s' if flips != 1 else ''} in {rollouts:,}.</p>
+  <p>{' '.join(lines)}</p>
 </section>
 """
+
+
+def repeated_replies(audit: dict[str, Any] | None, models: list[dict[str, Any]]) -> str:
+    if not audit:
+        return ""
+    pairs = sum(m["tasks_with_repeated_reply"] for m in audit["models"])
+    total = sum(m["tasks"] for m in models)
+    return f"A reply repeated verbatim in {pairs} of {total:,} model–study pairs."
 
 
 def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None) -> str:
@@ -185,19 +256,21 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
     protocol = data["protocol"]
     unsolved = data["unsolved_by_all"]
     best = models[0]
+    best_one = max(models, key=lambda m: m["pass@1"])
     tasks = data["tasks"]
     rollouts = sum(m["rollouts"] for m in models)
     unsolved_sources = ", ".join(
         f"{count} {source}" for source, count in sorted(unsolved["by_source"].items(), key=lambda kv: -kv[1])
     )
     validity = validity_section(audit, rollouts, tasks)
+    repeats = repeated_replies(audit, models)
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RadRead — a radiology reading benchmark</title>
-<meta name="description" content="RadRead scores frontier vision-language models on {tasks} audited radiology studies. A read passes only when every finding, box, diagnosis and next step is correct.">
+<title>RadRead</title>
+<meta name="description" content="RadRead: vision-language models reading {tasks} radiographs. A read passes only if every finding, box, diagnosis and next step is correct.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -205,102 +278,90 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 
 <header>
   <h1>RadRead</h1>
-  <p class="lede">A radiology reading benchmark. {tasks} audited studies; a read passes only when
-  every checklist finding, every lesion box, the diagnosis and the next step are all correct.</p>
-  <p class="meta">{tasks} studies · {max_k} rollouts per study · {sum(m['rollouts'] for m in models):,} graded reads · {built}</p>
+  <p class="lede">Vision-language models reading radiographs. {tasks} studies. A read passes only
+  if every finding, box, diagnosis and next step is correct.</p>
+  <p class="meta">{max_k} attempts per study · {rollouts:,} reads · {built} · <a href="traces/index.html">traces</a></p>
 </header>
 
 <section class="figures">
   <div>
     <p class="figure">{pct(best[f'pass@{max_k}'])}<span>%</span></p>
-    <p class="caption">best pass@{max_k} — {html.escape(best['name'])}, {max_k} attempts per study</p>
+    <p class="caption">best pass@{max_k} · {html.escape(best['name'])}</p>
   </div>
   <div>
-    <p class="figure">{pct(best['pass@1'])}<span>%</span></p>
-    <p class="caption">best pass@1 — one attempt, no retries</p>
+    <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
+    <p class="caption">best pass@1 · {html.escape(best_one['name'])}</p>
   </div>
   <div>
     <p class="figure">{unsolved['count']}</p>
-    <p class="caption">studies no model has ever read correctly</p>
+    <p class="caption">studies no model solved</p>
   </div>
 </section>
 
 <section>
   <h2>Leaderboard</h2>
   {leaderboard_table(models, max_k)}
-  <p class="note">pass@k is the unbiased estimator over {max_k} independent rollouts per study:
-  the share of studies a model gets entirely right within k attempts. <em>Checks</em> is the mean
-  share of individual gold checks passed — partial credit that the pass rate deliberately ignores.
-  <em>Never solved</em> counts studies the model missed in all {max_k} attempts.</p>
+  <p class="note">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
+  checks passed. Never solved: correct in 0 of {max_k} attempts.</p>
 </section>
 
 <section>
-  <h2>Attempts</h2>
+  <h2>pass@k</h2>
+  {passk_chart(models, max_k)}
   {curve_table(models, max_k)}
-  <p class="note">The best model reads {pct(best['pass@1'])}% of studies correctly on one attempt
-  and {pct(best[f'pass@{max_k}'])}% within {max_k}. The gap is the benchmark's headroom: the model
-  can find the answer, but not reliably.</p>
 </section>
 
 <section>
-  <h2>Reliability</h2>
+  <h2>Attempts correct</h2>
   {reliability(models, max_k)}
-  <p class="note">Studies split by how many of the {max_k} attempts were correct: always, sometimes,
-  never. Sampling runs at temperature 0 and no model returned the same read twice — the middle
-  band is a model that can see the finding and does not see it every time.</p>
+  <p class="note">Temperature 0. {repeats}</p>
 </section>
 
 <section>
-  <h2>By image source</h2>
+  <h2>pass@{max_k} by source</h2>
   {source_table(models, max_k)}
-  <p class="note">pass@{max_k} within each upstream source.</p>
 </section>
 
 <section>
-  <h2>What a pass requires</h2>
-  <p>One study, one model call, one JSON read. The grader is deterministic — no judge model
-  anywhere — and a study counts only when the read satisfies every one of:</p>
+  <h2>A pass</h2>
+  <p>One study, one call, one JSON read. Deterministic grader, no judge model. All of:</p>
   <ol>
-    <li>every requested checklist key answered, booleans and words matching the curated gold;</li>
-    <li>every must-find lesion localized, IoU ≥ 0.25, one answered box consumed per gold box;</li>
-    <li>spurious boxes inside the case's quota;</li>
-    <li>the one-line diagnosis inside the accepted label set;</li>
-    <li>the next step inside the accepted actions.</li>
+    <li>every checklist key answered and matching gold;</li>
+    <li>every must-find lesion matched by one box (the grader's IoU / centre / containment test);</li>
+    <li>extra boxes within the study's quota;</li>
+    <li>diagnosis in the accepted set;</li>
+    <li>next step in the accepted set.</li>
   </ol>
-  <p>There is no partial credit inside a study. A missing answer, an unparseable line or a
-  malformed read fails it outright.</p>
+  <p>No partial credit. Missing or unparseable output fails.</p>
 </section>
 
 <section>
   <h2>Protocol</h2>
   <dl>
-    <dt>Rollouts</dt><dd>{max_k} per study, scored independently</dd>
+    <dt>Rollouts</dt><dd>{max_k} per study</dd>
     <dt>Sampling</dt><dd>temperature {protocol['temperature']}, {protocol['max_tokens']:,} max tokens</dd>
     <dt>Reasoning</dt><dd>{html.escape(protocol['reasoning_effort'])}</dd>
     <dt>Inference</dt><dd>{html.escape(protocol['provider'])}</dd>
-    <dt>Scoring</dt><dd>{html.escape(protocol['scoring'])}</dd>
-    <dt>Images</dt><dd>1024 × 1024 px, one radiograph per study, sent on the image channel</dd>
+    <dt>Images</dt><dd>1024 × 1024 px, one per study</dd>
   </dl>
 </section>
 {validity}
 <section>
   <h2>Unsolved</h2>
-  <p>{unsolved['count']} of {tasks} studies were missed by every model in every attempt
-  ({unsolved_sources}). They are ordinary reads — the finding is there, annotated by the
-  upstream dataset, and no model in this cohort has ever produced it.</p>
+  <p>{unsolved['count']} of {tasks} studies: no model, no attempt. {unsolved_sources}.</p>
 </section>
 
 <section>
-  <h2>Data and code</h2>
+  <h2>Links</h2>
   <ul class="links">
-    <li><a href="{REPO_URL}">Benchmark and grader</a></li>
+    <li><a href="traces/index.html">Traces</a></li>
     <li><a href="{HF_DATA}">Rollout-level results</a></li>
-    <li><a href="{HF_SPACE}">Leaderboard on Hugging Face</a></li>
-    <li><a href="{SITE_REPO}">Source of this page</a></li>
+    <li><a href="{HF_SPACE}">Hugging Face mirror</a></li>
+    <li><a href="{REPO_URL}">Benchmark</a></li>
+    <li><a href="{SITE_REPO}">This page</a></li>
   </ul>
-  <p class="note">Images come from ChestX-Det, NIH ChestX-ray14, VinDr-CXR, GRAZPEDWRI-DX and the
-  RSNA Pneumonia Detection Challenge, under their own licences. The benchmark redistributes
-  annotations and code, not pixels.</p>
+  <p class="note">Images: ChestX-Det, NIH ChestX-ray14, VinDr-CXR, GRAZPEDWRI-DX, RSNA Pneumonia.
+  Not redistributed. Gold not published.</p>
 </section>
 
 <footer>
@@ -501,6 +562,80 @@ dd { margin: 0; }
 
 a { color: var(--ink); text-decoration: underline; text-underline-offset: 0.18em; }
 a:hover { color: var(--mute); }
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 1.5rem;
+  font-family: inherit;
+}
+
+.chart .grid { stroke: #ececec; stroke-width: 1; }
+.chart .frame { fill: none; stroke: var(--ink); stroke-width: 1; }
+.chart .tick { font-size: 11px; fill: var(--mute); }
+.chart .legend { font-size: 12px; fill: var(--ink); }
+
+/* trace pages */
+
+.crumb { margin: 0 0 1.5rem; color: var(--mute); font-size: 0.8rem; }
+
+h1.study {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+pre.prompt, pre.reply {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--rule);
+  background: #fafafa;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+pre.reply { border-top: 0; max-height: 34rem; overflow: auto; }
+
+.marks, .att { font-size: 0.9rem; letter-spacing: 0.12em; white-space: nowrap; }
+.marks { margin-left: 0.6rem; letter-spacing: 0.1em; }
+th.att, td.att { text-align: center; }
+.ok { color: var(--ink); }
+.ko { color: #c4c4c4; }
+
+table.traces td.model a { text-decoration: none; }
+table.traces td.model a:hover { text-decoration: underline; }
+
+details.attempt { margin: 0 0 0.5rem; border: 1px solid var(--rule); }
+details.attempt summary {
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  list-style: none;
+}
+details.attempt summary::-webkit-details-marker { display: none; }
+details.attempt[open] summary { border-bottom: 1px solid var(--rule); }
+.tag {
+  display: inline-block;
+  min-width: 2.6rem;
+  margin-right: 0.6rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: center;
+  border: 1px solid var(--ink);
+}
+.tag.pass { background: var(--ink); color: #fff; }
+.tag.fail { color: var(--mute); border-color: #c4c4c4; }
+.why { color: var(--mute); }
+.why code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.78rem; color: var(--ink); }
+p.nav { display: flex; justify-content: space-between; gap: 1rem; }
 
 footer {
   margin-top: 5rem;

@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RadRead — read_chestdet_multi_12</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+<p class='crumb'><a href='../index.html'>RadRead</a> · <a href='index.html'>Traces</a> · read_chestdet_multi_12</p><h1 class='study'>read_chestdet_multi_12</h1><p class='meta'>ChestX-Det · 25 attempts · 0 passed</p><section><h2>Request</h2><pre class='prompt'>Request form: Adult chest film; the form asks: ?normal. Frontal chest film, 1024 x 1024 px.
+
+Findings checklist (answer every key): pulmonary_nodules_present, calcified_focus_present; calcification_boxes is a LIST of boxes, one [x1, y1, x2, y2] per finding you identify - box every one, not only the most obvious; nodule_boxes is a LIST of boxes, one [x1, y1, x2, y2] per finding you identify - box every one, not only the most obvious.</pre><p class='note'>Radiograph not shown. The model received it (1024 × 1024) with this text.</p></section><section><h2>GPT-6 Astra <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [596, 428, 657, 506],
+      [711, 392, 727, 407],
+      [724, 471, 743, 495]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [711, 392, 727, 407],
+      [724, 471, 743, 495]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with calcified left pulmonary nodules and left hilar lymph nodes.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Calcified granulomatous changes; no acute cardiopulmonary abnormality.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:nodule_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [593, 432, 657, 506],
+      [711, 392, 726, 407],
+      [724, 469, 745, 494]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [727, 284, 764, 326],
+      [711, 392, 726, 407],
+      [724, 469, 745, 494]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Calcified granulomatous disease with an additional indeterminate left upper-lung nodular opacity.&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Calcified left pulmonary granulomas and left hilar nodes; compare prior films or obtain chest CT for the noncalcified left upper-lung opacity.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box_set:nodule_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [604, 435, 659, 506],
+      [712, 391, 726, 406],
+      [726, 472, 743, 493]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [726, 284, 766, 329],
+      [712, 391, 726, 406],
+      [726, 472, 743, 493]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Indeterminate left upper-lung nodule with calcified left hilar nodes and small calcified pulmonary granulomas.&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Compare with prior imaging; chest CT is recommended for the left upper-lung nodule if stability is not established. No acute airspace disease.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:nodule_boxes</code> — too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [713, 394, 724, 405],
+      [724, 472, 743, 494],
+      [598, 441, 657, 506]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [729, 284, 766, 323],
+      [713, 394, 724, 405],
+      [724, 472, 743, 494]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Indeterminate left upper-lobe pulmonary nodule with calcified left pulmonary granulomas and left hilar lymph nodes.&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Compare with prior imaging and obtain chest CT to characterize the noncalcified left upper-lobe nodule; no acute airspace disease.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [601, 443, 657, 505],
+      [710, 392, 726, 407],
+      [724, 466, 740, 480],
+      [726, 479, 744, 494]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [710, 392, 726, 407],
+      [724, 466, 740, 480],
+      [726, 479, 744, 494]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Old granulomatous disease with calcified left pulmonary nodules and left hilar lymph nodes.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Calcified granulomatous changes without acute cardiopulmonary abnormality.&quot;
+}</pre></details></section><section><h2>Claude Fable 5.1 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [585, 400, 660, 505]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left perihilar lobulated pulmonary nodule/mass; right chest wall port-a-cath in situ&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Lobulated soft-tissue nodule in the left perihilar region concerning for neoplasm/adenopathy in a patient with an indwelling port; CT chest recommended.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [585, 410, 660, 505]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [575, 400, 665, 515]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left perihilar lobulated dense nodule/mass, likely partly calcified; right chest wall port-a-cath in situ&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Not normal: lobulated dense left perihilar nodule (possible calcified node vs mass) in a patient with indwelling right port catheter; CT chest recommended.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [585, 405, 665, 505]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left perihilar pulmonary nodule/mass; right chest port-a-cath in situ&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Not normal: lobulated left perihilar nodular opacity suspicious for neoplasm (likely known malignancy given port); recommend CT chest correlation.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [588, 418, 662, 502]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left perihilar pulmonary nodule/mass in a patient with right-sided chest port&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Dense lobulated ~2.5 cm left perihilar nodule; right chest port in situ, tip in SVC region; no consolidation, effusion or pneumothorax - CT chest recommended.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [588, 412, 662, 508]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left perihilar lobulated pulmonary nodule/mass in a patient with right chest wall port-a-cath&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Not normal: lobulated ~7 cm-equivalent left perihilar nodule/mass suspicious for neoplasm (primary or metastatic); right subclavian port-a-cath in situ with tip in expected position; no consolidation, effusion or pneumothorax; CT chest recommended.&quot;
+}</pre></details></section><section><h2>Claude Opus 5 <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [586, 396, 686, 506],
+      [321, 448, 421, 566]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Not normal – ill-defined nodular/mass-like opacities at the left hilum and right perihilar/mid zone in a patient with an implanted right chest wall port, suspicious for neoplastic disease&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Abnormal chest film: left hilar mass-like density and right perihilar nodular opacity with indwelling port catheter – urgent CT chest with contrast and clinical/oncology review advised.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [585, 392, 678, 505],
+      [318, 452, 412, 562]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left hilar/perihilar nodular mass with smaller right perihilar opacity in a patient with an indwelling right chest-wall venous access port - suspicious for neoplasm&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Not a normal chest film: left hilar mass-like nodular opacity plus right perihilar nodularity; indwelling right subclavian port catheter in situ - urgent CT chest and oncology review advised.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [583, 392, 692, 512],
+      [322, 440, 430, 565]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Lobulated left hilar/perihilar mass (with smaller right perihilar opacity) in a patient with an indwelling right chest port — suspicious for bronchogenic carcinoma/metastatic disease&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Not a normal chest: left hilar mass and right perihilar nodular opacity; right-sided Port-a-Cath with catheter tip projecting over the mediastinum — urgent CT chest with contrast and oncology/respiratory review advised.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [583, 398, 679, 508]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left perihilar nodular/mass-like opacity in a patient with an indwelling right chest wall venous access port&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Not normal: left hilar/perihilar nodular opacity suspicious for neoplasm or adenopathy; right subclavian Port-a-Cath in situ with tip projecting over the SVC — recommend prompt CT chest correlation.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:calcified_focus_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>diagnosis</code> — diagnosis not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: false,
+    &quot;calcification_boxes&quot;: [],
+    &quot;nodule_boxes&quot;: [
+      [583, 393, 690, 505]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Left hilar/perihilar mass in a patient with an indwelling right chest-wall venous access port - suspicious for bronchogenic carcinoma&quot;,
+  &quot;next_step&quot;: &quot;urgent_review&quot;,
+  &quot;impression&quot;: &quot;Not normal: ill-defined left hilar nodular mass with right-sided Port-a-Cath in situ; no calcified focus - urgent CT chest and specialist review advised.&quot;
+}</pre></details></section><section><h2>Gemini 3.8 Flash <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [574, 420, 642, 494]
+    ],
+    &quot;nodule_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;Calcified left hilar lymph node/granuloma and right chest port-a-cath&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Benign calcified left hilar node/granuloma; appropriately positioned right-sided chemo port; no acute cardiopulmonary process.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s); <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [415, 574, 492, 645]
+    ],
+    &quot;nodule_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;Calcified left hilar lymph node, likely healed granulomatous disease&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Dense calcification in the left hilum consistent with a healed granulomatous lymph node; intact right chest port-a-cath.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s)</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [415, 570, 490, 642]
+    ],
+    &quot;nodule_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;Calcified left hilar lymph node/granuloma, unremarkable otherwise&quot;,
+  &quot;next_step&quot;: &quot;routine_followup&quot;,
+  &quot;impression&quot;: &quot;Dense calcification in the left hilum, consistent with a benign healed granuloma/calcified lymph node; right-sided chest port in expected position.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s); <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [572, 415, 642, 493]
+    ],
+    &quot;nodule_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;Calcified left hilar lymph node/granuloma&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Dense calcification in the left hilum consistent with a healed granuloma/calcified lymph node; right-sided chest port catheter in expected position.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>finding:pulmonary_nodules_present</code> — value not accepted; <code>box_set:calcification_boxes</code> — missed finding(s); <code>box_set:nodule_boxes</code> — missed finding(s); <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: false,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [570, 415, 645, 495]
+    ],
+    &quot;nodule_boxes&quot;: []
+  },
+  &quot;diagnosis&quot;: &quot;calcified left hilar granuloma or lymph node&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;Benign-appearing calcified left hilar lymph node or granuloma, likely sequela of prior granulomatous infection; right chest port in place.&quot;
+}</pre></details></section><section><h2>GPT-5.6 Sol <span class='marks'><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span><span class='ko'>○</span></span></h2><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 1 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [523, 428, 574, 491],
+      [684, 385, 698, 400],
+      [703, 443, 719, 460]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [684, 385, 698, 400],
+      [703, 443, 719, 460]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with calcified left hilar nodes and small calcified left pulmonary granulomas.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; chronic calcified granulomatous disease.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 2 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [619, 443, 660, 485],
+      [684, 421, 698, 435],
+      [682, 477, 700, 495]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [684, 421, 698, 435],
+      [682, 477, 700, 495]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with calcified left hilar node and small calcified left lung granulomas.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; chronic calcified granulomatous disease.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 3 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [582, 433, 650, 496],
+      [690, 420, 708, 438],
+      [719, 477, 740, 499]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [690, 420, 708, 438],
+      [719, 477, 740, 499]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with calcified left hilar nodes and small calcified left pulmonary granulomas.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; chronic calcified granulomatous foci.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 4 <span class='why'><code>box_set:calcification_boxes</code> — too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [548, 432, 596, 495],
+      [684, 389, 699, 403],
+      [705, 477, 725, 497]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [684, 389, 699, 403],
+      [705, 477, 725, 497]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Chronic calcified granulomatous disease with calcified left hilar nodes and small left lung granulomas.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; benign calcified left hilar and pulmonary granulomas.&quot;
+}</pre></details><details class='attempt fail'><summary><span class='tag fail'>fail</span> attempt 5 <span class='why'><code>box_set:calcification_boxes</code> — missed finding(s) and too many extra boxes; <code>box_set:nodule_boxes</code> — missed finding(s) and too many extra boxes; <code>next_step</code> — next step not in the accepted set</span></summary><pre class='reply'>{
+  &quot;findings&quot;: {
+    &quot;pulmonary_nodules_present&quot;: true,
+    &quot;calcified_focus_present&quot;: true,
+    &quot;calcification_boxes&quot;: [
+      [626, 429, 674, 480],
+      [684, 387, 698, 401],
+      [682, 475, 700, 493]
+    ],
+    &quot;nodule_boxes&quot;: [
+      [684, 387, 698, 401],
+      [682, 475, 700, 493]
+    ]
+  },
+  &quot;diagnosis&quot;: &quot;Healed granulomatous disease with calcified left hilar nodes and small calcified left pulmonary granulomas.&quot;,
+  &quot;next_step&quot;: &quot;none&quot;,
+  &quot;impression&quot;: &quot;No acute cardiopulmonary abnormality; benign calcified granulomatous disease.&quot;
+}</pre></details></section><footer><p class='nav'><a href='read_chestdet_multi_119.html'>← read_chestdet_multi_119</a> · <a href='read_chestdet_multi_120.html'>read_chestdet_multi_120 →</a></p></footer></main></body></html>
