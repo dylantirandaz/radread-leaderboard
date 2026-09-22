@@ -32,10 +32,12 @@ SOURCE_SHORT = {
     "RSNA Pneumonia": "RSNA",
 }
 
-REPO_URL = "https://github.com/dylantirandaz/radread"
+REPO_URL = "https://github.com/dylantirandaz/radread-public"
 HF_SPACE = "https://huggingface.co/spaces/tirandazdylan/radread-leaderboard"
 HF_DATA = "https://huggingface.co/datasets/tirandazdylan/radread-public-results"
 SITE_REPO = "https://github.com/dylantirandaz/radread-leaderboard"
+STATIC_ASSETS = ("site_assets/newsreader-latin.woff2", "site_assets/OFL.txt")
+
 
 def pct(value: float) -> str:
     return f"{value * 100:.1f}"
@@ -80,11 +82,17 @@ def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
 
 def curve_table(models: list[dict[str, Any]], max_k: int) -> str:
     ks = list(range(1, max_k + 1))
-    head = "<thead><tr><th>Model</th>" + "".join(f"<th class='num'>@{k}</th>" for k in ks) + "</tr></thead>"
+    head = (
+        "<thead><tr><th>Model</th>"
+        + "".join(f"<th class='num'>@{k}</th>" for k in ks)
+        + "</tr></thead>"
+    )
     rows = []
     for model in models:
         cells = "".join(f"<td class='num'>{pct(model[f'pass@{k}'])}</td>" for k in ks)
-        rows.append(f"<tr><td class='model'>{html.escape(model['name'])}</td>{cells}</tr>")
+        rows.append(
+            f"<tr><td class='model'>{html.escape(model['name'])}</td>{cells}</tr>"
+        )
     return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
@@ -108,12 +116,16 @@ def source_table(models: list[dict[str, Any]], max_k: int) -> str:
     rows = []
     for model in models:
         cells = "".join(
-            f"<td class='num'>{pct(model['by_source'][s][f'pass@{max_k}'])}</td>"
-            if s in model["by_source"]
-            else "<td class='num mute'>—</td>"
+            (
+                f"<td class='num'>{pct(model['by_source'][s][f'pass@{max_k}'])}</td>"
+                if s in model["by_source"]
+                else "<td class='num mute'>—</td>"
+            )
             for s in sources
         )
-        rows.append(f"<tr><td class='model'>{html.escape(model['name'])}</td>{cells}</tr>")
+        rows.append(
+            f"<tr><td class='model'>{html.escape(model['name'])}</td>{cells}</tr>"
+        )
     return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
@@ -131,7 +143,9 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     plot_w, plot_h = width - left - right, height - top - bottom
     ys = [m[f"pass@{k}"] for m in models for k in range(1, max_k + 1)]
     y_min = 0.0
-    y_max = max(0.6, min(1.0, (max(ys) * 100 // 10 + 1) * 10 / 100))  # 0-60 %, more only if a line needs it
+    y_max = max(
+        0.6, min(1.0, (max(ys) * 100 // 10 + 1) * 10 / 100)
+    )  # 0-60 %, more only if a line needs it
 
     def sx(k: int) -> float:
         return left + (k - 1) / (max_k - 1) * plot_w
@@ -139,26 +153,45 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     def sy(v: float) -> float:
         return top + (1 - (v - y_min) / (y_max - y_min)) * plot_h
 
-    parts = [f'<svg class="chart" viewBox="0 0 {width} {height}" role="img" aria-label="pass@k by model">']
+    parts = [
+        f'<svg class="chart" viewBox="0 0 {width} {height}" role="img" aria-label="pass@k by model">'
+    ]
     step = 0.1
     tick = y_min
     while tick <= y_max + 1e-9:
         y = sy(tick)
-        parts.append(f'<line x1="{left}" y1="{y:.1f}" x2="{left + plot_w}" y2="{y:.1f}" class="grid"/>')
-        parts.append(f'<text x="{left - 8}" y="{y + 4:.1f}" class="tick" text-anchor="end">{tick * 100:.0f}%</text>')
+        parts.append(
+            f'<line x1="{left}" y1="{y:.1f}" x2="{left + plot_w}" y2="{y:.1f}" class="grid"/>'
+        )
+        parts.append(
+            f'<text x="{left - 8}" y="{y + 4:.1f}" class="tick" text-anchor="end">{tick * 100:.0f}%</text>'
+        )
         tick += step
     for k in range(1, max_k + 1):
         x = sx(k)
-        parts.append(f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{top + plot_h}" class="grid"/>')
-        parts.append(f'<text x="{x:.1f}" y="{top + plot_h + 18}" class="tick" text-anchor="middle">{k}</text>')
-    parts.append(f'<text x="{left + plot_w / 2:.1f}" y="{height - 6}" class="tick" text-anchor="middle">k attempts</text>')
-    parts.append(f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" class="frame"/>')
+        parts.append(
+            f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{top + plot_h}" class="grid"/>'
+        )
+        parts.append(
+            f'<text x="{x:.1f}" y="{top + plot_h + 18}" class="tick" text-anchor="middle">{k}</text>'
+        )
+    parts.append(
+        f'<text x="{left + plot_w / 2:.1f}" y="{height - 6}" class="tick" text-anchor="middle">k attempts</text>'
+    )
+    parts.append(
+        f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" class="frame"/>'
+    )
     legend = []
     for index, model in enumerate(models):
         colour = PALETTE[index % len(PALETTE)]
         points = [(sx(k), sy(model[f"pass@{k}"])) for k in range(1, max_k + 1)]
-        path = " ".join(f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(points))
-        parts.append(f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="1.6"/>')
+        path = " ".join(
+            f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}"
+            for i, (x, y) in enumerate(points)
+        )
+        parts.append(
+            f'<path d="{path}" fill="none" stroke="{colour}" stroke-width="1.6"/>'
+        )
         for x, y in points:
             parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.2" fill="{colour}"/>')
         legend.append(
@@ -181,7 +214,11 @@ def reliability(models: list[dict[str, Any]], max_k: int) -> str:
         sometimes = total - never - always
         segments = "".join(
             f"<span class='seg {klass}' style='width:{value / total * 100:.4f}%'></span>"
-            for klass, value in (("always", always), ("sometimes", sometimes), ("never", never))
+            for klass, value in (
+                ("always", always),
+                ("sometimes", sometimes),
+                ("never", never),
+            )
         )
         rows.append(
             "<tr>"
@@ -208,7 +245,9 @@ def repeated_replies(audit: dict[str, Any] | None, models: list[dict[str, Any]])
     return f"A reply repeated verbatim in {pairs} of {total:,} model–study pairs."
 
 
-def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None) -> str:
+def render(
+    data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
+) -> str:
     models = data["models"]
     max_k = data["rollouts_per_task"]
     protocol = data["protocol"]
@@ -218,7 +257,10 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
     tasks = data["tasks"]
     rollouts = sum(m["rollouts"] for m in models)
     unsolved_sources = ", ".join(
-        f"{count} {source}" for source, count in sorted(unsolved["by_source"].items(), key=lambda kv: -kv[1])
+        f"{count} {source}"
+        for source, count in sorted(
+            unsolved["by_source"].items(), key=lambda kv: -kv[1]
+        )
     )
     repeats = repeated_replies(audit, models)
     return f"""<!doctype html>
@@ -227,7 +269,8 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RadRead</title>
-<meta name="description" content="RadRead: vision-language models reading {tasks} radiographs. Findings, boxes, diagnosis and next step are scored against a fixed rubric.">
+<meta name="description" content="RadRead: frontier models reading {tasks} radiographs. Findings, boxes, diagnosis and next step are scored against a fixed rubric.">
+<link rel="preload" href="site_assets/newsreader-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -241,7 +284,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 
 <header class="hero">
   <div class="wrap">
-    <h1>Vision-language models reading radiographs.</h1>
+    <h1><span>Frontier models</span> <span>reading radiographs.</span></h1>
     <p>{tasks} studies. Findings, boxes, diagnosis and next step must all match the rubric.</p>
     <p class="meta">{max_k} attempts per study · {rollouts:,} reads · {built}</p>
   </div>
@@ -252,11 +295,11 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 <div class="grid three">
   <article class="card figure-card">
     <p class="figure">{pct(best[f'pass@{max_k}'])}<span>%</span></p>
-    <p class="caption">best pass@{max_k} · {html.escape(best['name'])}</p>
+    <p class="caption">best pass@{max_k} · <span>{html.escape(best['name'])}</span></p>
   </article>
   <article class="card figure-card">
     <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
-    <p class="caption">best pass@1 · {html.escape(best_one['name'])}</p>
+    <p class="caption">best pass@1 · <span>{html.escape(best_one['name'])}</span></p>
   </article>
   <article class="card figure-card">
     <p class="figure">{unsolved['count']}</p>
@@ -265,7 +308,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 </div>
 
 <div class="grid">
-  <article class="card span2">
+  <article class="card span2" id="leaderboard">
     <h2>Leaderboard</h2>
     {leaderboard_table(models, max_k)}
     <p class="caption">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
@@ -275,7 +318,7 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
   <article class="card span2">
     <h2>pass@k</h2>
     <div class="two">
-      <div>{passk_chart(models, max_k)}</div>
+      <figure class="chart-figure">{passk_chart(models, max_k)}</figure>
       <div>{curve_table(models, max_k)}</div>
     </div>
   </article>
@@ -348,14 +391,22 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 """
 
 
-CSS = """:root {
-  --ink: #2f3034;
-  --mute: #6b6f76;
-  --rule: rgba(47, 48, 52, 0.15);
-  --hair: rgba(47, 48, 52, 0.08);
-  --band: #e9f1fa;
-  --fill: #2f3034;
-  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+CSS = """@font-face {
+  font-family: "Newsreader";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("site_assets/newsreader-latin.woff2") format("woff2");
+}
+
+:root {
+  --ink: #293238;
+  --mute: #626b71;
+  --rule: #d8dee2;
+  --hair: #edf0f2;
+  --band: #e8f3fc;
+  --fill: #455b6b;
+  --serif: "Newsreader", Georgia, "Iowan Old Style", "Times New Roman", serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -371,39 +422,41 @@ html {
 
 body { margin: 0; color: var(--ink); background: #fff; line-height: 1.5; }
 
-.wrap { width: min(1080px, calc(100% - 3rem)); margin: 0 auto; }
+.wrap { width: min(1100px, calc(100% - 3rem)); margin: 0 auto; }
 
 /* centered masthead */
 
+nav.top { background: var(--band); }
 nav.top .wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem 0 1.35rem;
-  border-bottom: 1px solid var(--rule);
+  gap: 0.8rem;
+  padding: 1.65rem 0 1.2rem;
+  border-bottom: 1px solid rgba(41, 50, 56, 0.12);
 }
-nav.top .brand { font-size: 2.6rem; line-height: 1.1; letter-spacing: -0.045em; text-decoration: none; color: var(--ink); }
+nav.top .brand { font-size: 2.5rem; line-height: 1; letter-spacing: -0.04em; text-decoration: none; color: var(--ink); }
 nav.top .links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem 1.6rem; font-family: var(--sans); font-size: 0.82rem; }
 nav.top .links a { color: var(--ink); text-decoration: none; }
 nav.top .links a:hover { text-decoration: underline; }
-nav.top .btn { border: 1px solid var(--ink); padding: 0.35rem 0.8rem; }
+nav.top .btn { border: 1px solid #8a9ba7; padding: 0.35rem 0.8rem; }
 nav.top .btn:hover { background: var(--ink); color: #fff; text-decoration: none; }
 
 /* editorial introduction */
 
-header.hero { padding: clamp(2.5rem, 5vw, 4.25rem) 0 2.75rem; text-align: center; }
+header.hero { padding: 3.3rem 0 3.1rem; background: var(--band); text-align: center; }
 header.hero h1 {
-  margin: 0 auto 1.25rem;
-  max-width: 42rem;
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  margin: 0 auto 1.5rem;
+  max-width: 50rem;
+  font-size: clamp(2.65rem, 5.3vw, 4.5rem);
   font-weight: 400;
-  line-height: 1.12;
+  line-height: 1.03;
   letter-spacing: -0.035em;
   text-wrap: balance;
 }
-header.hero p { margin: 0 auto; max-width: 36rem; font-size: 1.08rem; text-wrap: balance; }
-header.hero .meta { margin-top: 1.2rem; font-size: 0.78rem; }
+header.hero h1 span { display: block; }
+header.hero p { margin: 0 auto; max-width: 33rem; font-size: 1.2rem; line-height: 1.4; text-wrap: balance; }
+header.hero .meta { margin-top: 1.4rem; font-size: 0.75rem; }
 
 .meta, .caption { font-family: var(--sans); color: var(--mute); font-size: 0.82rem; line-height: 1.55; }
 .caption { margin: 1rem 0 0; }
@@ -412,8 +465,8 @@ header.hero .meta { margin-top: 1.2rem; font-size: 0.78rem; }
 
 main.wrap { padding-bottom: 2rem; }
 
-.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem 2.5rem; }
-.grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 1.65rem 0; margin-bottom: 3rem; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3.5rem 3rem; }
+.grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 2.1rem 0; margin-bottom: 3.5rem; border-bottom: 1px solid var(--rule); }
 .span2 { grid-column: 1 / -1; }
 .two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; max-width: 46rem; margin: 0 auto; }
 .two.even { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; max-width: none; }
@@ -421,13 +474,13 @@ main.wrap { padding-bottom: 2rem; }
 
 .card {
   border-top: 1px solid var(--rule);
-  padding: 1.5rem 0 0;
+  padding: 1.65rem 0 0;
   min-width: 0;
 }
 
 .card h2 {
   margin: 0 0 1.25rem;
-  font-size: 1.65rem;
+  font-size: 2rem;
   font-weight: 400;
   line-height: 1.25;
   letter-spacing: -0.02em;
@@ -440,9 +493,10 @@ main.wrap { padding-bottom: 2rem; }
 
 .figure-card { padding: 0 1rem; border-top: 0; text-align: center; }
 .figure-card + .figure-card { border-left: 1px solid var(--rule); }
-.figure { margin: 0; font-size: clamp(2.3rem, 4vw, 3rem); font-weight: 400; line-height: 1; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
-.figure span { font-size: 1.2rem; margin-left: 0.1rem; }
-.figure-card .caption { margin: 0.65rem 0 0; font-size: 0.78rem; }
+.figure { margin: 0; font-size: clamp(2.6rem, 4.4vw, 3.5rem); font-weight: 400; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: lining-nums tabular-nums; }
+.figure span { font-size: 1.25rem; margin-left: 0.1rem; }
+.figure-card .caption { margin: 0.7rem 0 0; font-size: 0.75rem; }
+.figure-card .caption span { white-space: nowrap; }
 
 /* tables */
 
@@ -455,9 +509,9 @@ table {
   font-variant-numeric: tabular-nums;
   font-size: 0.9rem;
 }
-th, td { padding: 0.6rem 0.6rem; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; }
-thead th { border-bottom: 1px solid var(--ink); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mute); }
-tbody tr:last-child td { border-bottom: 1px solid var(--ink); }
+th, td { padding: 0.75rem 0.6rem; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+thead th { border-bottom: 1px solid #89949d; font-weight: 500; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); }
+tbody tr:last-child td { border-bottom: 1px solid #89949d; }
 table.board tbody tr:hover { background: var(--band); }
 th:first-child, td:first-child { padding-left: 0; }
 th:last-child, td:last-child { padding-right: 0; }
@@ -489,10 +543,12 @@ ul.links-list li { margin-bottom: 0.4rem; }
 
 a { color: var(--ink); text-decoration: underline; text-underline-offset: 0.18em; }
 a:hover { color: var(--mute); }
+a:focus-visible, summary:focus-visible { outline: 2px solid #315d92; outline-offset: 4px; }
 
+.chart-figure { min-width: 0; margin: 0; padding: 1.3rem; border: 1px solid var(--rule); background: #f8fbfd; }
 .chart { display: block; width: 100%; height: auto; margin: 0; font-family: var(--sans); }
-.chart .grid { stroke: #e6e8eb; stroke-width: 1; }
-.chart .frame { fill: none; stroke: var(--ink); stroke-width: 1; }
+.chart .grid { stroke: #dce3e8; stroke-width: 1; }
+.chart .frame { fill: none; stroke: #89949d; stroke-width: 1; }
 .chart .tick { font-size: 12px; fill: var(--mute); }
 .card .chart-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 0.82rem; }
 .card .chart-key li { display: flex; align-items: center; gap: 0.45rem; margin: 0; }
@@ -567,15 +623,16 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
   nav.top .brand { font-size: 2.25rem; }
   nav.top .links { gap: 0.5rem 1rem; font-size: 0.76rem; }
   nav.top .btn { padding: 0.3rem 0.6rem; }
-  header.hero { padding: 2.5rem 0 2rem; }
-  header.hero p { font-size: 1rem; }
+  header.hero { padding: 2.6rem 0 2.3rem; }
+  header.hero p { font-size: 1.1rem; }
   header.hero .meta { font-size: 0.72rem; }
-  .grid.three { padding: 1.25rem 0; margin-bottom: 2.25rem; }
+  .grid.three { padding: 1.55rem 0; margin-bottom: 2.5rem; }
   .figure-card { padding: 0 0.4rem; }
-  .figure { font-size: 2rem; }
-  .figure span { font-size: 0.85rem; }
+  .figure { font-size: 2.35rem; }
+  .figure span { font-size: 0.9rem; }
   .figure-card .caption { font-size: 0.7rem; line-height: 1.4; }
-  .card h2 { font-size: 1.5rem; }
+  .card h2 { font-size: 1.8rem; }
+  .chart-figure { padding: 0.8rem 0.5rem; }
   .chart .tick { font-size: 20px; }
   dl { grid-template-columns: 6rem minmax(0, 1fr); gap: 0.6rem 0.8rem; }
   .meta-inline { display: block; margin: 0.4rem 0 0; }
@@ -587,18 +644,35 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=Path("results/leaderboard.json"))
-    parser.add_argument("--audit", type=Path, default=Path("results/audit.json"),
-                        help="audit output; the repeated-reply count is omitted when the file is absent")
+    parser.add_argument(
+        "--audit",
+        type=Path,
+        default=Path("results/audit.json"),
+        help="audit output; the repeated-reply count is omitted when the file is absent",
+    )
     parser.add_argument("--out", type=Path, default=Path("site"))
     args = parser.parse_args()
 
     data = json.loads(args.data.read_text(encoding="utf-8"))
-    audit = json.loads(args.audit.read_text(encoding="utf-8")) if args.audit.is_file() else None
-    built = dt.date.today().isoformat()
+    audit = (
+        json.loads(args.audit.read_text(encoding="utf-8"))
+        if args.audit.is_file()
+        else None
+    )
+    built = dt.datetime.now(dt.timezone.utc).date().isoformat()
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "index.html").write_text(render(data, built, audit), encoding="utf-8", newline="\n")
+    (args.out / "index.html").write_text(
+        render(data, built, audit), encoding="utf-8", newline="\n"
+    )
     (args.out / "style.css").write_text(CSS, encoding="utf-8", newline="\n")
-    shutil.copyfile(args.data, args.out / "leaderboard.json")
+    if args.data.resolve() != (args.out / "leaderboard.json").resolve():
+        shutil.copyfile(args.data, args.out / "leaderboard.json")
+    for name in STATIC_ASSETS:
+        source = Path(__file__).parent / name
+        target = args.out / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.resolve() != target.resolve():
+            shutil.copyfile(source, target)
     print(f"wrote {args.out / 'index.html'}")
 
 
