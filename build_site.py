@@ -1,7 +1,7 @@
 """Render the RadRead results site from results/leaderboard.json.
 
-All results are baked into static HTML. Optional JavaScript animates the result bars;
-scores, tables and links work without it, including from file://, Pages and static Spaces.
+All results are baked into static HTML. Scores, tables and links work without
+JavaScript, including from file://, Pages and static Spaces.
 
 usage: python scripts/build_site.py --data results/leaderboard.json --out site
 """
@@ -39,7 +39,6 @@ SITE_REPO = "https://github.com/dylantirandaz/radread-leaderboard"
 STATIC_ASSETS = (
     "site_assets/source-serif-4-latin.woff2",
     "site_assets/OFL.txt",
-    "site_assets/queue.js",
 )
 
 
@@ -289,7 +288,6 @@ def render(
 <meta name="description" content="RadRead: frontier models reading {tasks} radiographs. Findings, boxes, diagnosis and next step are scored against a fixed rubric.">
 <link rel="preload" href="site_assets/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
-<script src="site_assets/queue.js" defer></script>
 </head>
 <body class="results-page">
 <a class="skip-link" href="#leaderboard">Skip to results</a>
@@ -340,11 +338,9 @@ def render(
       <p class="caption">never solved by any model</p>
     </div>
   </div>
-  <div class="readout" data-readout>
+  <div class="readout">
   {leaderboard_table(models, max_k)}
-  <p class="caption">pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed. Never solved = 0/{max_k}.
-    <button type="button" data-queue-replay aria-label="Replay result bars" hidden>Replay</button>
-  </p>
+  <p class="caption">pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed. Never solved = 0/{max_k}.</p>
   </div>
 </section>
 
@@ -491,7 +487,7 @@ body { margin: 0; color: var(--ink); background: #fff; line-height: 1.5; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)'/%3E%3C/svg%3E");
 }
 
-.wrap { width: min(1000px, calc(100% - 3rem)); margin: 0 auto; }
+.wrap { width: min(1100px, calc(100% - 3rem)); margin: 0 auto; }
 .skip-link { position: absolute; top: -5rem; left: 1rem; z-index: 20; padding: 0.6rem 1rem; background: #fff; }
 .skip-link:focus { top: 1rem; }
 
@@ -524,8 +520,6 @@ header.hero {
 .study-map span { width: 5px; height: 5px; border: 1px solid var(--mint-ink); border-radius: 50%; }
 .study-map .solved { background: var(--mint-ink); }
 .study-map .unsolved { background: #fff; border-color: var(--pink-ink); }
-[data-queue-replay] { padding: 0.25rem 0.45rem; border: 1px solid var(--rule); border-radius: 0.2rem; background: #fff; color: var(--ink); font: inherit; cursor: pointer; }
-[data-queue-replay]:hover { background: var(--mint-wash); border-color: var(--mint-ink); }
 header.hero .eyebrow { margin: 0 0 1rem; font-family: var(--sans); font-size: 0.75rem; color: var(--mute); }
 header.hero h1 {
   margin: 0 auto 1.4rem;
@@ -633,17 +627,7 @@ th:last-child, td:last-child { padding-right: 0; }
 th .n { display: block; font-size: 0.68rem; color: var(--mute); }
 
 .bar { display: inline-block; height: 7px; vertical-align: middle; background: #eee; overflow: hidden; }
-.bar .fill { position: relative; display: block; height: 100%; background: #222; overflow: hidden; }
-.bar .fill::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.18) 50%, transparent 80%); transform: translateX(-100%); opacity: 0; pointer-events: none; }
-.readout.is-replaying .fill::after { animation: result-load 3200ms linear both; animation-delay: var(--queue-delay); }
-@keyframes result-load {
-  0% { transform: translateX(-100%); opacity: 0; }
-  18%, 82% { opacity: 1; }
-  100% { transform: translateX(100%); opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .readout .fill::after { animation: none !important; }
-}
+.bar .fill { display: block; height: 100%; background: #222; }
 
 .band { width: 46%; }
 .stack { display: flex; width: 100%; height: 7px; background: var(--pink); }
@@ -727,8 +711,11 @@ table.checks td.mark { width: 1rem; padding-right: 0.4rem; }
 table.checks td.mark.ko { color: var(--pink-ink); }
 p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-family: var(--sans); font-size: 0.85rem; overflow-wrap: anywhere; }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
   .two.even { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 1000px) {
   .criteria-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .plot, th.plot { display: none; }
 }

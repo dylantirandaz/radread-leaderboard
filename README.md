@@ -10,5 +10,5 @@ These scores are not a clinical error rate.
 Rebuild: `python build_site.py --data leaderboard.json --out .`.
 
 `traces/` contains every reply and check verdict. Images and gold are not published.
-Results work without JavaScript; `site_assets/queue.js` adds optional result-bar motion.
+Results use static HTML and CSS, with no JavaScript required.
 Source Serif 4 and its SIL Open Font License are in `site_assets/`.
