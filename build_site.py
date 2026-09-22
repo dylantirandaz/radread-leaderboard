@@ -133,16 +133,12 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     """pass@k for k = 1..max_k, one line per model, as inline SVG.
 
     Drawn by hand rather than with a chart library so the page stays script-free: a light
-    grid, y axis in percent, circle markers, legend in the right margin.
+    grid, y axis fixed at 0–100 %, circle markers, legend in the right margin.
     """
     width, height = 720, 340
     left, right, top, bottom = 52, 150, 18, 40  # right margin holds the legend
     plot_w, plot_h = width - left - right, height - top - bottom
-    ys = [m[f"pass@{k}"] for m in models for k in range(1, max_k + 1)]
-    y_max = min(1.0, (max(ys) * 100 // 10 + 1) * 10 / 100)  # next 10 % above the top line
-    y_min = max(0.0, (min(ys) * 100 // 10) * 10 / 100)      # 10 % below the bottom line
-    if y_max - y_min < 0.2:
-        y_min = max(0.0, y_max - 0.2)
+    y_min, y_max = 0.0, 1.0  # full scale, always: the empty top half is part of the result
 
     def sx(k: int) -> float:
         return left + (k - 1) / (max_k - 1) * plot_w
@@ -151,7 +147,7 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
         return top + (1 - (v - y_min) / (y_max - y_min)) * plot_h
 
     parts = [f'<svg class="chart" viewBox="0 0 {width} {height}" role="img" aria-label="pass@k by model">']
-    step = 0.1 if y_max - y_min > 0.3 else 0.05
+    step = 0.1
     tick = y_min
     while tick <= y_max + 1e-9:
         y = sy(tick)
