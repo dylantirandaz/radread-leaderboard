@@ -130,11 +130,11 @@ def source_table(models: list[dict[str, Any]], max_k: int) -> str:
 
 
 LINE_STYLES = (
-    ("#111", "none"),
-    ("#444", "8 4"),
-    ("#777", "3 3"),
-    ("#444", "10 3 2 3"),
-    ("#777", "2 5"),
+    ("#0072B2", "none"),
+    ("#D55E00", "8 4"),
+    ("#008768", "3 3"),
+    ("#A66A00", "10 3 2 3"),
+    ("#B23A69", "2 5"),
 )
 
 
@@ -142,7 +142,7 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     """pass@k for k = 1..max_k, one line per model, as inline SVG.
 
     Drawn by hand rather than with a chart library so the page stays script-free: a light
-    grid, y axis from 0 to at least 60 %, distinct monochrome lines, and a wrapping legend.
+    grid, y axis from 0 to at least 60 %, distinct colors and dashes, and a wrapping legend.
     """
     width, height = 640, 360
     left, right, top, bottom = 56, 20, 26, 40
