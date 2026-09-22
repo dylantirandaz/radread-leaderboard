@@ -271,12 +271,9 @@ def render(
         )
     )
     repeats = repeated_replies(audit, models)
-    map_columns = 27
-    study_dots = "".join(
-        f'<circle cx="{9 + (index % map_columns) * 18}" '
-        f'cy="{9 + (index // map_columns) * 18}" r="4" '
-        f'class="{"solved" if index < tasks - unsolved["count"] else "unsolved"}"/>'
-        for index in range(tasks)
+    study_dots = (
+        '<span class="solved"></span>' * (tasks - unsolved["count"])
+        + '<span class="unsolved"></span>' * unsolved["count"]
     )
     return f"""<!doctype html>
 <html lang="en">
@@ -299,13 +296,12 @@ def render(
 
 <header class="hero">
   <div class="wrap">
-    <svg class="study-map" viewBox="0 0 {map_columns * 18} {((tasks + map_columns - 1) // map_columns) * 18}"
-      role="img" aria-labelledby="study-map-title study-map-desc">
-      <title id="study-map-title">{tasks} studies, {unsolved['count']} never solved</title>
-      <desc id="study-map-desc">Each dot represents one study. Filled dots passed at least once across all models.
-      Outlined dots never passed. Dots are grouped by outcome, not source or task order.</desc>
+    <div class="study-map" role="img"
+      aria-label="{tasks} studies, {unsolved['count']} never solved. Each dot represents one study.
+      Filled dots passed at least once across all models; outlined dots never passed.
+      Dots are grouped by outcome, not source or task order.">
       {study_dots}
-    </svg>
+    </div>
     <p class="eyebrow">One dot per study · outlined = never solved</p>
     <h1><span>Frontier models</span> <span>reading radiographs.</span></h1>
     <p class="hero-description">{tasks} studies. Findings, boxes, diagnosis and next step must all match the rubric.</p>
@@ -485,11 +481,18 @@ nav.top .links { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5re
 nav.top .links a { color: var(--ink); text-decoration: none; }
 nav.top .links a:hover { text-decoration: underline; }
 
-header.hero { padding: 6rem 0 7rem; text-align: center; }
-.study-map { display: block; width: min(100%, 28rem); height: auto; margin: 0 auto 2.75rem; }
-.study-map circle { stroke: var(--ink); stroke-width: 1; }
-.study-map .solved { fill: var(--ink); }
-.study-map .unsolved { fill: #fff; }
+header.hero { padding: 4rem 0 7rem; text-align: center; }
+.study-map {
+  display: grid;
+  grid-template-columns: repeat(81, minmax(0, 1fr));
+  justify-items: center;
+  row-gap: 10px;
+  width: 100%;
+  margin: 0 auto 2rem;
+}
+.study-map span { width: 5px; height: 5px; border: 1px solid var(--ink); border-radius: 50%; }
+.study-map .solved { background: var(--ink); }
+.study-map .unsolved { background: #fff; }
 header.hero .eyebrow { margin: 0 0 1rem; font-family: var(--sans); font-size: 0.75rem; color: var(--mute); }
 header.hero h1 {
   margin: 0 auto 1.4rem;
@@ -674,12 +677,16 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
   .plot, th.plot { display: none; }
 }
 
+@media (max-width: 800px) {
+  .study-map { grid-template-columns: repeat(27, minmax(0, 1fr)); row-gap: 6px; }
+}
+
 @media (max-width: 600px) {
   .wrap { width: calc(100% - 2rem); }
   nav.top .wrap { width: calc(100% - 2rem); flex-wrap: wrap; padding: 1rem 0; gap: 0.85rem; }
   nav.top .links { gap: 0.5rem 1rem; font-size: 0.72rem; }
-  header.hero { padding: 3.5rem 0 4.5rem; }
-  .study-map { width: min(100%, 24rem); margin-bottom: 2rem; }
+  header.hero { padding: 2.5rem 0 4.5rem; }
+  .study-map { margin-bottom: 1.5rem; }
   .hero-description { font-size: 1rem; }
   header.hero .meta { font-size: 0.72rem; }
   .result-section { margin-bottom: 4.5rem; scroll-margin-top: 7.5rem; }
