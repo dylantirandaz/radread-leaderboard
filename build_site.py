@@ -37,6 +37,14 @@ HF_SPACE = "https://huggingface.co/spaces/tirandazdylan/radread-leaderboard"
 HF_DATA = "https://huggingface.co/datasets/tirandazdylan/radread-public-results"
 SITE_REPO = "https://github.com/dylantirandaz/radread-leaderboard"
 
+DISPLAY_SHORT = {
+    "anthropic/claude-opus-5": "Claude Opus 5",
+    "anthropic/claude-fable-5.1": "Claude Fable 5.1",
+    "openai/gpt-6-astra": "GPT-6 Astra",
+    "openai/gpt-5.6-sol": "GPT-5.6 Sol",
+    "google/gemini-3.8-flash": "Gemini 3.8 Flash",
+}
+
 
 def pct(value: float) -> str:
     return f"{value * 100:.1f}"
@@ -148,16 +156,41 @@ def reliability(models: list[dict[str, Any]], max_k: int) -> str:
     return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
-def render(data: dict[str, Any], built: str) -> str:
+def validity_section(audit: dict[str, Any] | None, rollouts: int, tasks: int) -> str:
+    """Audit evidence, rendered only when results/audit.json exists — never invented."""
+    if not audit or not audit.get("blind"):
+        return ""
+    mismatches = sum(len(m["regrade_mismatches"]) for m in audit["models"])
+    truncated = sum(m["truncated"] for m in audit["models"])
+    blind = " and ".join(
+        f"{b['pass_rate'] * 100:.1f}% for {DISPLAY_SHORT.get(b['model'], b['model'])}" for b in audit["blind"]
+    )
+    sens = audit["threshold_sensitivity"]
+    flips = sens.get("best_iou_0.20_0.25", 0)
+    return f"""
+<section>
+  <h2>Validity</h2>
+  <p>Every transcript was re-graded independently after the runs: {rollouts - mismatches:,} of
+  {rollouts:,} rewards reproduce, {truncated} truncated. With the radiograph withheld, the same
+  {tasks} prompts pass {blind} of studies — the checklist does not give the finding away. Box
+  failures are misses, not near misses: loosening the IoU threshold to 0.20 would change
+  {flips} read{'s' if flips != 1 else ''} in {rollouts:,}.</p>
+</section>
+"""
+
+
+def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None) -> str:
     models = data["models"]
     max_k = data["rollouts_per_task"]
     protocol = data["protocol"]
     unsolved = data["unsolved_by_all"]
     best = models[0]
     tasks = data["tasks"]
+    rollouts = sum(m["rollouts"] for m in models)
     unsolved_sources = ", ".join(
         f"{count} {source}" for source, count in sorted(unsolved["by_source"].items(), key=lambda kv: -kv[1])
     )
+    validity = validity_section(audit, rollouts, tasks)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -249,7 +282,7 @@ def render(data: dict[str, Any], built: str) -> str:
     <dt>Images</dt><dd>1024 × 1024 px, one radiograph per study, sent on the image channel</dd>
   </dl>
 </section>
-
+{validity}
 <section>
   <h2>Unsolved</h2>
   <p>{unsolved['count']} of {tasks} studies were missed by every model in every attempt
@@ -491,13 +524,16 @@ footer {
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=Path("results/leaderboard.json"))
+    parser.add_argument("--audit", type=Path, default=Path("results/audit.json"),
+                        help="audit output; the Validity section is omitted when the file is absent")
     parser.add_argument("--out", type=Path, default=Path("site"))
     args = parser.parse_args()
 
     data = json.loads(args.data.read_text(encoding="utf-8"))
+    audit = json.loads(args.audit.read_text(encoding="utf-8")) if args.audit.is_file() else None
     built = dt.date.today().isoformat()
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "index.html").write_text(render(data, built), encoding="utf-8", newline="\n")
+    (args.out / "index.html").write_text(render(data, built, audit), encoding="utf-8", newline="\n")
     (args.out / "style.css").write_text(CSS, encoding="utf-8", newline="\n")
     shutil.copyfile(args.data, args.out / "leaderboard.json")
     print(f"wrote {args.out / 'index.html'}")
