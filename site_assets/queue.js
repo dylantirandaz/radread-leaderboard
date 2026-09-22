@@ -8,8 +8,8 @@
 
   const replay = readout.querySelector("[data-queue-replay]");
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const duration = 1150 + (bars.length - 1) * 140;
-  bars.forEach((bar, index) => bar.style.setProperty("--queue-delay", `${index * 140}ms`));
+  const duration = 3250 + (bars.length - 1) * 220;
+  bars.forEach((bar, index) => bar.style.setProperty("--queue-delay", `${index * 220}ms`));
   let timer = 0;
   let enabled = false;
   let visible = false;
