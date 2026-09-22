@@ -24,7 +24,7 @@
   function start() {
     if (!enabled || document.hidden || !visible) return;
     settle();
-    // Replay only the fill transform; widths and numerical scores never change.
+    // Move only a faint highlight inside each fixed, score-proportional bar.
     void readout.offsetWidth;
     played = true;
     readout.classList.add("is-replaying");

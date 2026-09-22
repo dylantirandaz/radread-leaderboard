@@ -479,12 +479,12 @@ body { margin: 0; color: var(--ink); background: #fff; line-height: 1.5; }
 .results-page::before, .results-page::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 .results-page::before {
   background:
-    radial-gradient(ellipse 42% 34% at 8% 16%, rgba(243, 190, 222, 0.42), rgba(244, 205, 232, 0.16) 48%, transparent 76%),
-    radial-gradient(ellipse 32% 36% at 24% 18%, rgba(250, 216, 230, 0.32), transparent 72%),
-    radial-gradient(ellipse 50% 52% at 100% 38%, rgba(144, 223, 193, 0.4), transparent 72%),
-    radial-gradient(ellipse 32% 30% at 89% 58%, rgba(191, 238, 219, 0.25), transparent 74%),
-    radial-gradient(ellipse 48% 45% at -9% 78%, rgba(192, 184, 220, 0.22), transparent 72%),
-    radial-gradient(ellipse 38% 30% at 14% 100%, rgba(220, 234, 160, 0.24), transparent 76%);
+    radial-gradient(ellipse 42% 34% at 8% 16%, rgba(243, 190, 222, 0.48), rgba(244, 205, 232, 0.18) 48%, transparent 76%),
+    radial-gradient(ellipse 32% 36% at 24% 18%, rgba(250, 216, 230, 0.36), transparent 72%),
+    radial-gradient(ellipse 50% 52% at 100% 38%, rgba(144, 223, 193, 0.46), transparent 72%),
+    radial-gradient(ellipse 32% 30% at 89% 58%, rgba(191, 238, 219, 0.28), transparent 74%),
+    radial-gradient(ellipse 48% 45% at -9% 78%, rgba(192, 184, 220, 0.25), transparent 72%),
+    radial-gradient(ellipse 38% 30% at 14% 100%, rgba(220, 234, 160, 0.27), transparent 76%);
 }
 .results-page::after {
   opacity: 0.035;
@@ -619,10 +619,10 @@ table.board tbody tr:hover { background: var(--band); }
 th:first-child, td:first-child { padding-left: 0; }
 th:last-child, td:last-child { padding-right: 0; }
 .readout .board, .curve-layout .board { background: rgba(255, 255, 255, 0.78); }
-.readout .board thead th, .curve-layout .board thead th { background: rgba(152, 230, 197, 0.16); color: var(--mint-ink); border-bottom-color: #aecbbb; }
-.readout .board th:nth-child(4), .readout .board td:nth-child(4) { background: rgba(243, 197, 229, 0.12); }
+.readout .board thead th, .curve-layout .board thead th { background: rgba(152, 230, 197, 0.1); color: var(--mint-ink); border-bottom-color: #c4d7cd; }
+.readout .board th:nth-child(4), .readout .board td:nth-child(4) { background: rgba(243, 197, 229, 0.06); }
 .readout .board th:nth-child(5), .readout .board td:nth-child(5),
-.curve-layout .board th:last-child, .curve-layout .board td:last-child { background: rgba(152, 230, 197, 0.18); color: var(--mint-ink); }
+.curve-layout .board th:last-child, .curve-layout .board td:last-child { background: rgba(152, 230, 197, 0.1); color: var(--mint-ink); }
 .num { text-align: right; }
 .rank { width: 1.5rem; color: var(--mute); }
 .model { font-weight: 500; }
@@ -632,15 +632,17 @@ th:last-child, td:last-child { padding-right: 0; }
 .mute { color: var(--mute); }
 th .n { display: block; font-size: 0.68rem; color: var(--mute); }
 
-.bar { display: inline-block; height: 7px; vertical-align: middle; background: #e8eeeb; overflow: hidden; }
-.bar .fill { display: block; height: 100%; background: #222; transform-origin: left; }
-.readout.is-replaying .fill { animation: result-load 3200ms cubic-bezier(0.25, 0.1, 0.25, 1) both; animation-delay: var(--queue-delay); }
+.bar { display: inline-block; height: 7px; vertical-align: middle; background: #eee; overflow: hidden; }
+.bar .fill { position: relative; display: block; height: 100%; background: #222; overflow: hidden; }
+.bar .fill::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.18) 50%, transparent 80%); transform: translateX(-100%); opacity: 0; pointer-events: none; }
+.readout.is-replaying .fill::after { animation: result-load 3200ms linear both; animation-delay: var(--queue-delay); }
 @keyframes result-load {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+  0% { transform: translateX(-100%); opacity: 0; }
+  18%, 82% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .readout .fill { animation: none !important; }
+  .readout .fill::after { animation: none !important; }
 }
 
 .band { width: 46%; }
