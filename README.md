@@ -1,6 +1,6 @@
 # RadRead leaderboard
 
-The published results page for [RadRead](https://github.com/dylantirandaz/radread), a radiology
+The published results page for RadRead, a radiology
 reading benchmark.
 
 - Page: https://dylantirandaz.com/radread-leaderboard/
