@@ -1,5 +1,3 @@
-# RadRead leaderboard
-
 The published results page for RadRead, a radiology
 reading benchmark.
 
