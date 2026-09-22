@@ -172,7 +172,7 @@ def validity_section(audit: dict[str, Any] | None, rollouts: int, tasks: int) ->
   <h2>Validity</h2>
   <p>Every transcript was re-graded independently after the runs: {rollouts - mismatches:,} of
   {rollouts:,} rewards reproduce, {truncated} truncated. With the radiograph withheld, the same
-  {tasks} prompts pass {blind} of studies — the checklist does not give the finding away. Box
+  {tasks} prompts pass {blind} — the checklist does not give the finding away. Box
   failures are misses, not near misses: loosening the IoU threshold to 0.20 would change
   {flips} read{'s' if flips != 1 else ''} in {rollouts:,}.</p>
 </section>
