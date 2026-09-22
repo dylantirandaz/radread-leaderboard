@@ -271,6 +271,13 @@ def render(
         )
     )
     repeats = repeated_replies(audit, models)
+    map_columns = 27
+    study_dots = "".join(
+        f'<circle cx="{9 + (index % map_columns) * 18}" '
+        f'cy="{9 + (index // map_columns) * 18}" r="4" '
+        f'class="{"solved" if index < tasks - unsolved["count"] else "unsolved"}"/>'
+        for index in range(tasks)
+    )
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -286,112 +293,146 @@ def render(
 <nav class="top">
   <div class="wrap">
     <a class="brand" href="index.html">RadRead</a>
-    <span class="links"><a href="index.html">Leaderboard</a><a href="traces/index.html">Traces</a><a href="{HF_DATA}">Results</a><a href="{REPO_URL}">Benchmark</a></span>
+    <span class="links"><a href="#leaderboard">Leaderboard</a><a href="traces/index.html">Traces</a><a href="{HF_DATA}">Results</a><a href="{REPO_URL}">Benchmark</a></span>
   </div>
 </nav>
 
 <header class="hero">
   <div class="wrap">
+    <svg class="study-map" viewBox="0 0 {map_columns * 18} {((tasks + map_columns - 1) // map_columns) * 18}"
+      role="img" aria-labelledby="study-map-title study-map-desc">
+      <title id="study-map-title">{tasks} studies, {unsolved['count']} never solved</title>
+      <desc id="study-map-desc">Each dot represents one study. Filled dots passed at least once across all models.
+      Outlined dots never passed. Dots are grouped by outcome, not source or task order.</desc>
+      {study_dots}
+    </svg>
+    <p class="eyebrow">One dot per study · outlined = never solved</p>
     <h1><span>Frontier models</span> <span>reading radiographs.</span></h1>
-    <p>{tasks} studies. Findings, boxes, diagnosis and next step must all match the rubric.</p>
-    <p class="meta">{max_k} attempts per study · {rollouts:,} reads · {built}</p>
+    <p class="hero-description">{tasks} studies. Findings, boxes, diagnosis and next step must all match the rubric.</p>
+    <div class="action-links">
+      <a href="#leaderboard">Explore results <span aria-hidden="true">↓</span></a>
+      <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
+    </div>
+    <p class="meta">{max_k} attempts per study · {rollouts:,} reads</p>
   </div>
 </header>
 
-<main class="wrap">
+<main class="wrap landing">
 
-<div class="grid three">
-  <article class="card figure-card">
-    <p class="figure">{pct(best[f'pass@{max_k}'])}<span>%</span></p>
-    <p class="caption">best pass@{max_k} · <span>{html.escape(best['name'])}</span></p>
-  </article>
-  <article class="card figure-card">
-    <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
-    <p class="caption">best pass@1 · <span>{html.escape(best_one['name'])}</span></p>
-  </article>
-  <article class="card figure-card">
-    <p class="figure">{unsolved['count']}</p>
-    <p class="caption">studies with no passing read</p>
-  </article>
-</div>
-
-<div class="grid">
-  <article class="card span2" id="leaderboard">
-    <h2>Leaderboard</h2>
-    {leaderboard_table(models, max_k)}
-    <p class="caption">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
-    checks passed. Never solved: passed in 0 of {max_k} attempts.</p>
-  </article>
-
-  <article class="card span2">
-    <h2>pass@k</h2>
-    <div class="two">
-      <figure class="chart-figure">{passk_chart(models, max_k)}</figure>
-      <div>{curve_table(models, max_k)}</div>
+<section class="result-section" id="leaderboard" aria-labelledby="leaderboard-title">
+  <div class="section-heading">
+    <h2 id="leaderboard-title">How frontier models perform</h2>
+    <p>{len(models)} models. One fixed rubric.</p>
+  </div>
+  <div class="metric-grid">
+    <div class="figure-card">
+      <p class="figure">{pct(best[f'pass@{max_k}'])}<span>%</span></p>
+      <p class="caption">best pass@{max_k} · <span>{html.escape(best['name'])}</span></p>
     </div>
-  </article>
-
-  <article class="card">
-    <h2>Attempts correct</h2>
-    {reliability(models, max_k)}
-    <p class="caption">Temperature 0. {repeats}</p>
-  </article>
-
-  <article class="card">
-    <h2>pass@{max_k} by source</h2>
-    {source_table(models, max_k)}
-  </article>
-
-  <article class="card">
-    <h2>A pass</h2>
-    <p>One study, one call, one JSON read. Deterministic grader, no judge model. All of:</p>
-    <ol>
-      <li>every checklist key answered and matching gold;</li>
-      <li>every must-find lesion matched by one box (the grader's IoU / centre / containment test);</li>
-      <li>extra boxes within the study's quota;</li>
-      <li>diagnosis in the accepted set;</li>
-      <li>next step in the accepted set.</li>
-    </ol>
-    <p>No partial credit. Missing or unparseable output fails. A failed read is not necessarily a clinical error.</p>
-  </article>
-
-  <article class="card">
-    <h2>Protocol</h2>
-    <dl>
-      <dt>Rollouts</dt><dd>{max_k} per study</dd>
-      <dt>Sampling</dt><dd>temperature {protocol['temperature']}, {protocol['max_tokens']:,} max tokens</dd>
-      <dt>Reasoning</dt><dd>{html.escape(protocol['reasoning_effort'])}</dd>
-      <dt>Inference</dt><dd>{html.escape(protocol['provider'])}</dd>
-      <dt>Images</dt><dd>1024 × 1024 px, one per study</dd>
-    </dl>
-  </article>
-
-  <article class="card span2">
-    <div class="two even">
-      <div>
-        <h2>Unsolved</h2>
-        <p>{unsolved['count']} of {tasks} studies: no model, no attempt. {unsolved_sources}.</p>
-        <p class="caption">Images: ChestX-Det, NIH ChestX-ray14, VinDr-CXR, GRAZPEDWRI-DX, RSNA Pneumonia.
-        Not redistributed. Gold not published.</p>
-      </div>
-      <div>
-        <h2>Links</h2>
-        <ul class="links-list">
-          <li><a href="traces/index.html">Traces — every attempt, reply and verdict</a></li>
-          <li><a href="{HF_DATA}">Rollout-level results</a></li>
-          <li><a href="{HF_SPACE}">Hugging Face mirror</a></li>
-          <li><a href="{REPO_URL}">Benchmark</a></li>
-          <li><a href="{SITE_REPO}">This page</a></li>
-        </ul>
-      </div>
+    <div class="figure-card">
+      <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
+      <p class="caption">best pass@1 · <span>{html.escape(best_one['name'])}</span></p>
     </div>
-  </article>
-</div>
+    <div class="figure-card">
+      <p class="figure">{unsolved['count']}</p>
+      <p class="caption">studies with no passing read</p>
+    </div>
+  </div>
+  {leaderboard_table(models, max_k)}
+  <p class="caption">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
+  checks passed. Never solved: passed in 0 of {max_k} attempts.</p>
+</section>
+
+<section class="result-section" aria-labelledby="attempts-title">
+  <div class="section-heading">
+    <h2 id="attempts-title">Accuracy across attempts</h2>
+    <p>pass@1 through pass@{max_k}, averaged over every study.</p>
+  </div>
+  <div class="curve-layout">
+    <figure class="chart-figure">{passk_chart(models, max_k)}</figure>
+    {curve_table(models, max_k)}
+  </div>
+</section>
+
+<section class="result-section" aria-labelledby="breakdown-title">
+  <div class="section-heading">
+    <h2 id="breakdown-title">A closer look at the results</h2>
+  </div>
+  <div class="two even">
+    <article class="panel">
+      <h3>Attempts correct</h3>
+      {reliability(models, max_k)}
+      <p class="caption">Temperature 0. {repeats}</p>
+    </article>
+    <article class="panel">
+      <h3>pass@{max_k} by source</h3>
+      {source_table(models, max_k)}
+    </article>
+  </div>
+</section>
+
+<section class="result-section" id="method" aria-labelledby="method-title">
+  <div class="section-heading">
+    <h2 id="method-title">One study. A complete read.</h2>
+    <p>One image, one call, one JSON response. A deterministic grader, not a judge model.</p>
+  </div>
+  <div class="criteria-grid">
+    <article>
+      <h3>Findings</h3>
+      <p>Every checklist key answered and matching gold.</p>
+    </article>
+    <article>
+      <h3>Localization</h3>
+      <p>Every must-find lesion matched by one box using the grader's IoU, centre or containment test.
+      Extra boxes must stay within the study's quota.</p>
+    </article>
+    <article>
+      <h3>Diagnosis</h3>
+      <p>The diagnosis must be in the study's accepted set.</p>
+    </article>
+    <article>
+      <h3>Next step</h3>
+      <p>The management recommendation must be in the accepted set.</p>
+    </article>
+  </div>
+  <p class="method-note">All checks must pass. No partial credit for a study pass. Missing or unparseable output fails.
+  A failed read is not necessarily a clinical error.</p>
+  <div class="two even protocol-grid">
+    <article>
+      <h3>Evaluation protocol</h3>
+      <dl>
+        <dt>Rollouts</dt><dd>{max_k} per study</dd>
+        <dt>Sampling</dt><dd>temperature {protocol['temperature']}, {protocol['max_tokens']:,} max tokens</dd>
+        <dt>Reasoning</dt><dd>{html.escape(protocol['reasoning_effort'])}</dd>
+        <dt>Inference</dt><dd>{html.escape(protocol['provider'])}</dd>
+        <dt>Images</dt><dd>1024 × 1024 px, one per study</dd>
+      </dl>
+    </article>
+    <article>
+      <h3>Never solved</h3>
+      <p>{unsolved['count']} of {tasks} studies had no passing read across any model or attempt. {unsolved_sources}.</p>
+      <p class="caption">The outlined dots above represent these studies. Images come from ChestX-Det,
+      NIH ChestX-ray14, VinDr-CXR, GRAZPEDWRI-DX and RSNA Pneumonia.</p>
+    </article>
+  </div>
+</section>
+
+<section class="explore" aria-labelledby="explore-title">
+  <h2 id="explore-title">Explore the benchmark</h2>
+  <p>Read the tasks, inspect every attempt, or work with the results.
+  Radiographs and gold are not published.</p>
+  <div class="action-links">
+    <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
+    <a href="traces/index.html">All traces <span aria-hidden="true">↗</span></a>
+    <a href="{HF_DATA}">Result data <span aria-hidden="true">↗</span></a>
+  </div>
+</section>
 
 </main>
 
 <footer class="wrap">
   <p>RadRead · {built}</p>
+  <p><a href="{HF_SPACE}">Hugging Face mirror</a> · <a href="{SITE_REPO}">Site source</a></p>
 </footer>
 
 </body>
@@ -428,52 +469,69 @@ html {
 
 body { margin: 0; color: var(--ink); background: #fff; line-height: 1.5; }
 
-.wrap { width: min(1100px, calc(100% - 3rem)); margin: 0 auto; }
+.wrap { width: min(1000px, calc(100% - 3rem)); margin: 0 auto; }
 
-/* centered masthead */
-
+nav.top { position: sticky; top: 0; z-index: 10; background: #fff; }
 nav.top .wrap {
+  width: calc(100% - 3rem);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.8rem;
-  padding: 1.65rem 0 1.2rem;
-  border-bottom: 1px solid var(--rule);
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding: 1rem 0;
 }
-nav.top .brand { font-size: 1.6rem; font-weight: 500; line-height: 1; letter-spacing: -0.04em; text-decoration: none; color: var(--ink); }
-nav.top .links { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem 1.6rem; font-family: var(--sans); font-size: 0.82rem; }
+nav.top .brand { font-size: 1.35rem; font-weight: 500; line-height: 1; letter-spacing: -0.04em; text-decoration: none; color: var(--ink); }
+nav.top .links { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem 1.6rem; font-family: var(--sans); font-size: 0.78rem; }
 nav.top .links a { color: var(--ink); text-decoration: none; }
 nav.top .links a:hover { text-decoration: underline; }
 
-/* editorial introduction */
-
-header.hero { padding: 2.75rem 0 2.2rem; text-align: center; }
+header.hero { padding: 6rem 0 7rem; text-align: center; }
+.study-map { display: block; width: min(100%, 28rem); height: auto; margin: 0 auto 2.75rem; }
+.study-map circle { stroke: var(--ink); stroke-width: 1; }
+.study-map .solved { fill: var(--ink); }
+.study-map .unsolved { fill: #fff; }
+header.hero .eyebrow { margin: 0 0 1rem; font-family: var(--sans); font-size: 0.75rem; color: var(--mute); }
 header.hero h1 {
-  margin: 0 auto 1.2rem;
+  margin: 0 auto 1.4rem;
   max-width: 44rem;
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
   font-weight: 400;
-  line-height: 1.15;
+  line-height: 1.1;
   letter-spacing: -0.025em;
   text-wrap: balance;
 }
 header.hero h1 span { display: block; }
-header.hero p { margin: 0 auto; max-width: 33rem; font-size: 1rem; line-height: 1.6; text-wrap: balance; }
-header.hero .meta { margin-top: 1.4rem; font-size: 0.75rem; }
+.hero-description { margin: 0 auto; max-width: 27rem; color: var(--mute); font-size: 1.05rem; line-height: 1.6; text-wrap: balance; }
+header.hero .meta { margin: 1.8rem 0 0; font-size: 0.75rem; }
+.action-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem 1.75rem; margin-top: 1.8rem; font-family: var(--sans); font-size: 0.84rem; }
+.action-links a { text-decoration: none; }
+.action-links a:hover { text-decoration: underline; }
+.action-links span { margin-left: 0.3rem; }
 
 .meta, .caption { font-family: var(--sans); color: var(--mute); font-size: 0.82rem; line-height: 1.55; }
 .caption { margin: 1rem 0 0; }
 
-/* results and supporting sections */
-
 main.wrap { padding-bottom: 2rem; }
-
-.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.8rem 2.5rem; }
-.grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; padding: 1.5rem 0; margin-bottom: 2.5rem; border-bottom: 1px solid var(--rule); }
-.span2 { grid-column: 1 / -1; }
-.two { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; max-width: 46rem; margin: 0 auto; }
-.two.even { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem; max-width: none; }
-.two > div { min-width: 0; }
+.result-section { margin-bottom: 7rem; scroll-margin-top: 6rem; }
+.section-heading { margin: 0 auto 2.5rem; text-align: center; }
+.section-heading h2, .explore h2 { margin: 0 0 1rem; font-size: clamp(1.6rem, 2.8vw, 2rem); font-weight: 400; line-height: 1.25; letter-spacing: -0.025em; text-wrap: balance; }
+.section-heading p { max-width: 34rem; margin: 0 auto; color: var(--mute); font-family: var(--sans); font-size: 0.9rem; text-wrap: balance; }
+.metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 3rem 0; }
+.curve-layout { max-width: 46rem; margin: 0 auto; display: grid; gap: 2.25rem; }
+.two.even { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+.two > *, .criteria-grid > * { min-width: 0; }
+.panel { min-width: 0; padding: 1.5rem; background: var(--band); border-radius: 0.35rem; }
+.landing h3 { margin: 0 0 1rem; font-size: 1.2rem; font-weight: 400; line-height: 1.3; }
+.panel th, .panel td { padding-left: 0.5rem; padding-right: 0.5rem; }
+.panel table { font-size: 0.8rem; }
+.criteria-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; }
+.criteria-grid h3 { font-family: var(--sans); font-size: 0.9rem; font-weight: 500; }
+.criteria-grid p { margin: 0; font-family: var(--sans); color: var(--mute); font-size: 0.85rem; line-height: 1.6; }
+.method-note { margin: 2.5rem auto 0; max-width: 38rem; text-align: center; font-size: 0.95rem; color: var(--mute); text-wrap: balance; }
+.protocol-grid { margin-top: 4rem; }
+.protocol-grid p { margin: 0 0 1rem; }
+.explore { padding: 1rem 0 5rem; text-align: center; }
+.explore > p { margin: 0 auto; max-width: 29rem; color: var(--mute); text-wrap: balance; }
 
 .card {
   border-top: 1px solid var(--rule);
@@ -488,7 +546,6 @@ main.wrap { padding-bottom: 2rem; }
   line-height: 1.25;
   letter-spacing: -0.02em;
 }
-.grid > .card:first-child { border-top: 0; padding-top: 0; }
 
 .card p { margin: 0 0 0.8rem; }
 .card ol, .card ul { margin: 0 0 0.8rem; padding-left: 1.2rem; }
@@ -540,9 +597,6 @@ dl { display: grid; grid-template-columns: 8rem 1fr; gap: 0.45rem 1rem; margin: 
 dt { color: var(--mute); }
 dd { margin: 0; }
 
-ul.links-list { list-style: none; padding-left: 0; }
-ul.links-list li { margin-bottom: 0.4rem; }
-
 a { color: var(--ink); text-decoration: underline; text-underline-offset: 0.18em; }
 a:hover { color: var(--mute); }
 a:focus-visible, summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
@@ -552,11 +606,11 @@ a:focus-visible, summary:focus-visible { outline: 2px solid var(--ink); outline-
 .chart .grid { stroke: var(--rule); stroke-width: 1; }
 .chart .frame { fill: none; stroke: #999; stroke-width: 1; }
 .chart .tick { font-size: 12px; fill: var(--mute); }
-.card .chart-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 0.82rem; }
-.card .chart-key li { display: flex; align-items: center; gap: 0.45rem; margin: 0; }
+.chart-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 1.25rem; margin: 0.75rem 0 0; padding: 0; list-style: none; font-family: var(--sans); font-size: 0.82rem; }
+.chart-key li { display: flex; align-items: center; gap: 0.45rem; margin: 0; }
 .key-line { display: block; flex: 0 0 2rem; width: 2rem; height: 0.5rem; }
 
-footer.wrap { padding-top: 1rem; padding-bottom: 3rem; border-top: 1px solid var(--rule); font-family: var(--sans); font-size: 0.78rem; color: var(--mute); }
+footer.wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0 1rem; padding-top: 1rem; padding-bottom: 2rem; border-top: 1px solid var(--rule); font-family: var(--sans); font-size: 0.75rem; color: var(--mute); }
 
 /* trace pages */
 
@@ -615,19 +669,27 @@ table.checks td.mark.ko { color: var(--ink); }
 p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-family: var(--sans); font-size: 0.85rem; overflow-wrap: anywhere; }
 
 @media (max-width: 1000px) {
-  .grid:not(.three), .two.even { grid-template-columns: minmax(0, 1fr); }
+  .two.even { grid-template-columns: minmax(0, 1fr); }
+  .criteria-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .plot, th.plot { display: none; }
 }
 
 @media (max-width: 600px) {
   .wrap { width: calc(100% - 2rem); }
-  nav.top .wrap { padding-top: 1.5rem; gap: 0.8rem; }
-  nav.top .links { gap: 0.5rem 1rem; font-size: 0.76rem; }
-  header.hero { padding: 2.6rem 0 2.3rem; }
-  header.hero p { font-size: 1rem; }
+  nav.top .wrap { width: calc(100% - 2rem); flex-wrap: wrap; padding: 1rem 0; gap: 0.85rem; }
+  nav.top .links { gap: 0.5rem 1rem; font-size: 0.72rem; }
+  header.hero { padding: 3.5rem 0 4.5rem; }
+  .study-map { width: min(100%, 24rem); margin-bottom: 2rem; }
+  .hero-description { font-size: 1rem; }
   header.hero .meta { font-size: 0.72rem; }
-  .grid.three { padding: 1.55rem 0; margin-bottom: 2.5rem; }
+  .result-section { margin-bottom: 4.5rem; scroll-margin-top: 7.5rem; }
+  .section-heading { margin-bottom: 2rem; }
+  .metric-grid { gap: 0; margin: 2.5rem 0; }
   .figure-card { padding: 0 0.4rem; }
+  .panel { padding: 1.2rem; }
+  .criteria-grid { gap: 1.75rem 1.25rem; }
+  .protocol-grid { margin-top: 2.5rem; }
+  .explore { padding-bottom: 3rem; }
   .figure { font-size: 1.7rem; }
   .figure span { font-size: 0.9rem; }
   .figure-card .caption { font-size: 0.7rem; line-height: 1.4; }
