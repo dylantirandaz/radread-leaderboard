@@ -126,8 +126,8 @@ def passk_chart(models: list[dict[str, Any]], max_k: int) -> str:
     Drawn by hand rather than with a chart library so the page stays script-free: a light
     grid, y axis from 0 to at least 60 %, circle markers, legend in the right margin.
     """
-    width, height = 720, 340
-    left, right, top, bottom = 52, 150, 18, 40  # right margin holds the legend
+    width, height = 640, 360
+    left, right, top, bottom = 48, 150, 18, 40  # right margin holds the legend
     plot_w, plot_h = width - left - right, height - top - bottom
     ys = [m[f"pass@{k}"] for m in models for k in range(1, max_k + 1)]
     y_min = 0.0
@@ -230,400 +230,328 @@ def render(data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main>
 
-<header>
-  <h1>RadRead</h1>
-  <p class="lede">Vision-language models reading radiographs. {tasks} studies. A read passes only
-  if every finding, box, diagnosis and next step is correct.</p>
-  <p class="meta">{max_k} attempts per study · {rollouts:,} reads · {built} · <a href="traces/index.html">traces</a></p>
+<nav class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html">RadRead</a>
+    <span class="links"><a href="index.html">Leaderboard</a><a href="traces/index.html">Traces</a><a href="{HF_DATA}">Results</a><a class="btn" href="{REPO_URL}">Benchmark</a></span>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Vision-language models reading radiographs.</h1>
+    <p>{tasks} studies. A read passes only if every finding, box, diagnosis and next step is correct.</p>
+    <p class="meta">{max_k} attempts per study · {rollouts:,} reads · {built}</p>
+  </div>
 </header>
 
-<section class="figures">
-  <div>
+<main class="wrap">
+
+<div class="grid three">
+  <article class="card figure-card">
     <p class="figure">{pct(best[f'pass@{max_k}'])}<span>%</span></p>
     <p class="caption">best pass@{max_k} · {html.escape(best['name'])}</p>
-  </div>
-  <div>
+  </article>
+  <article class="card figure-card">
     <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
     <p class="caption">best pass@1 · {html.escape(best_one['name'])}</p>
-  </div>
-  <div>
+  </article>
+  <article class="card figure-card">
     <p class="figure">{unsolved['count']}</p>
     <p class="caption">studies no model solved</p>
-  </div>
-</section>
+  </article>
+</div>
 
-<section>
-  <h2>Leaderboard</h2>
-  {leaderboard_table(models, max_k)}
-  <p class="note">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
-  checks passed. Never solved: correct in 0 of {max_k} attempts.</p>
-</section>
+<div class="grid">
+  <article class="card span2">
+    <h2>Leaderboard</h2>
+    {leaderboard_table(models, max_k)}
+    <p class="caption">pass@k: unbiased estimator over {max_k} rollouts. Checks: mean share of gold
+    checks passed. Never solved: correct in 0 of {max_k} attempts.</p>
+  </article>
 
-<section>
-  <h2>pass@k</h2>
-  {passk_chart(models, max_k)}
-  {curve_table(models, max_k)}
-</section>
+  <article class="card span2">
+    <h2>pass@k</h2>
+    <div class="two">
+      <div>{passk_chart(models, max_k)}</div>
+      <div>{curve_table(models, max_k)}</div>
+    </div>
+  </article>
 
-<section>
-  <h2>Attempts correct</h2>
-  {reliability(models, max_k)}
-  <p class="note">Temperature 0. {repeats}</p>
-</section>
+  <article class="card">
+    <h2>Attempts correct</h2>
+    {reliability(models, max_k)}
+    <p class="caption">Temperature 0. {repeats}</p>
+  </article>
 
-<section>
-  <h2>pass@{max_k} by source</h2>
-  {source_table(models, max_k)}
-</section>
+  <article class="card">
+    <h2>pass@{max_k} by source</h2>
+    {source_table(models, max_k)}
+  </article>
 
-<section>
-  <h2>A pass</h2>
-  <p>One study, one call, one JSON read. Deterministic grader, no judge model. All of:</p>
-  <ol>
-    <li>every checklist key answered and matching gold;</li>
-    <li>every must-find lesion matched by one box (the grader's IoU / centre / containment test);</li>
-    <li>extra boxes within the study's quota;</li>
-    <li>diagnosis in the accepted set;</li>
-    <li>next step in the accepted set.</li>
-  </ol>
-  <p>No partial credit. Missing or unparseable output fails.</p>
-</section>
+  <article class="card">
+    <h2>A pass</h2>
+    <p>One study, one call, one JSON read. Deterministic grader, no judge model. All of:</p>
+    <ol>
+      <li>every checklist key answered and matching gold;</li>
+      <li>every must-find lesion matched by one box (the grader's IoU / centre / containment test);</li>
+      <li>extra boxes within the study's quota;</li>
+      <li>diagnosis in the accepted set;</li>
+      <li>next step in the accepted set.</li>
+    </ol>
+    <p>No partial credit. Missing or unparseable output fails.</p>
+  </article>
 
-<section>
-  <h2>Protocol</h2>
-  <dl>
-    <dt>Rollouts</dt><dd>{max_k} per study</dd>
-    <dt>Sampling</dt><dd>temperature {protocol['temperature']}, {protocol['max_tokens']:,} max tokens</dd>
-    <dt>Reasoning</dt><dd>{html.escape(protocol['reasoning_effort'])}</dd>
-    <dt>Inference</dt><dd>{html.escape(protocol['provider'])}</dd>
-    <dt>Images</dt><dd>1024 × 1024 px, one per study</dd>
-  </dl>
-</section>
+  <article class="card">
+    <h2>Protocol</h2>
+    <dl>
+      <dt>Rollouts</dt><dd>{max_k} per study</dd>
+      <dt>Sampling</dt><dd>temperature {protocol['temperature']}, {protocol['max_tokens']:,} max tokens</dd>
+      <dt>Reasoning</dt><dd>{html.escape(protocol['reasoning_effort'])}</dd>
+      <dt>Inference</dt><dd>{html.escape(protocol['provider'])}</dd>
+      <dt>Images</dt><dd>1024 × 1024 px, one per study</dd>
+    </dl>
+  </article>
 
-<section>
-  <h2>Unsolved</h2>
-  <p>{unsolved['count']} of {tasks} studies: no model, no attempt. {unsolved_sources}.</p>
-</section>
+  <article class="card span2">
+    <div class="two even">
+      <div>
+        <h2>Unsolved</h2>
+        <p>{unsolved['count']} of {tasks} studies: no model, no attempt. {unsolved_sources}.</p>
+        <p class="caption">Images: ChestX-Det, NIH ChestX-ray14, VinDr-CXR, GRAZPEDWRI-DX, RSNA Pneumonia.
+        Not redistributed. Gold not published.</p>
+      </div>
+      <div>
+        <h2>Links</h2>
+        <ul class="links-list">
+          <li><a href="traces/index.html">Traces — every attempt, reply and verdict</a></li>
+          <li><a href="{HF_DATA}">Rollout-level results</a></li>
+          <li><a href="{HF_SPACE}">Hugging Face mirror</a></li>
+          <li><a href="{REPO_URL}">Benchmark</a></li>
+          <li><a href="{SITE_REPO}">This page</a></li>
+        </ul>
+      </div>
+    </div>
+  </article>
+</div>
 
-<section>
-  <h2>Links</h2>
-  <ul class="links">
-    <li><a href="traces/index.html">Traces</a></li>
-    <li><a href="{HF_DATA}">Rollout-level results</a></li>
-    <li><a href="{HF_SPACE}">Hugging Face mirror</a></li>
-    <li><a href="{REPO_URL}">Benchmark</a></li>
-    <li><a href="{SITE_REPO}">This page</a></li>
-  </ul>
-  <p class="note">Images: ChestX-Det, NIH ChestX-ray14, VinDr-CXR, GRAZPEDWRI-DX, RSNA Pneumonia.
-  Not redistributed. Gold not published.</p>
-</section>
+</main>
 
-<footer>
+<footer class="wrap">
   <p>RadRead · {built}</p>
 </footer>
 
-</main>
 </body>
 </html>
 """
 
 
 CSS = """:root {
-  --ink: #111;
-  --mute: #767676;
-  --rule: #e2e2e2;
-  --fill: #111;
+  --ink: #2f3034;
+  --mute: #6b6f76;
+  --rule: rgba(47, 48, 52, 0.15);
+  --hair: rgba(47, 48, 52, 0.08);
+  --band: #e9f1fa;
+  --fill: #2f3034;
+  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
 
 html {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 15px;
+  font-family: var(--serif);
+  font-size: 17px;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-body {
-  margin: 0;
-  color: var(--ink);
-  background: #fff;
-  line-height: 1.55;
-}
+body { margin: 0; color: var(--ink); background: #fff; line-height: 1.5; }
 
-main {
-  max-width: 54rem;
-  margin: 0 auto;
-  padding: 5rem 1.5rem 6rem;
-}
+.wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; }
 
-header { margin-bottom: 4rem; }
+/* top bar */
 
-h1 {
-  margin: 0 0 1.25rem;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
+nav.top { border-bottom: 1px solid var(--hair); }
+nav.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 3.6rem; }
+nav.top .brand { font-size: 1.15rem; text-decoration: none; color: var(--ink); }
+nav.top .links { display: flex; align-items: center; gap: 1.5rem; font-family: var(--sans); font-size: 0.85rem; }
+nav.top .links a { color: var(--ink); text-decoration: none; }
+nav.top .links a:hover { text-decoration: underline; }
+nav.top .btn { border: 1px solid var(--ink); padding: 0.35rem 0.8rem; }
+nav.top .btn:hover { background: var(--ink); color: #fff; text-decoration: none; }
 
-h2 {
+/* hero band */
+
+header.hero { background: var(--band); padding: 4rem 0 4rem; }
+header.hero h1 {
   margin: 0 0 1rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--mute);
-}
-
-.lede {
-  margin: 0 0 0.75rem;
   max-width: 34rem;
-  font-size: 1.05rem;
+  font-size: 2.6rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+header.hero p { margin: 0; max-width: 34rem; font-size: 1.1rem; }
+header.hero .meta { margin-top: 0.8rem; }
+
+.meta, .caption { font-family: var(--sans); color: var(--mute); font-size: 0.82rem; line-height: 1.55; }
+.caption { margin: 1rem 0 0; }
+
+/* cards */
+
+main.wrap { padding-top: 2rem; padding-bottom: 2rem; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+.grid.three { grid-template-columns: repeat(3, 1fr); }
+.span2 { grid-column: 1 / -1; }
+.two { display: grid; grid-template-columns: 3fr 2fr; gap: 2rem; align-items: start; }
+.two.even { grid-template-columns: 1fr 1fr; }
+.two > div { min-width: 0; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  padding: 1.75rem 1.9rem 1.9rem;
+  min-width: 0;
 }
 
-.meta, .note {
-  color: var(--mute);
-  font-size: 0.8rem;
-  line-height: 1.6;
+.card h2 {
+  margin: 0 0 1.1rem;
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
 }
+.card h2.later { margin-top: 2rem; }
 
-.meta { margin: 0; }
-.note { margin: 0.9rem 0 0; max-width: 34rem; }
+.card p { margin: 0 0 0.8rem; }
+.card ol, .card ul { margin: 0 0 0.8rem; padding-left: 1.2rem; }
+.card li { margin-bottom: 0.3rem; }
 
-section { margin-bottom: 3.5rem; }
+.figure-card { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.figure { margin: 0; font-size: 3rem; font-weight: 400; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.figure span { font-size: 1.2rem; margin-left: 0.1rem; }
+.figure-card .caption { margin-top: 0.6rem; }
 
-p { margin: 0 0 0.9rem; max-width: 34rem; }
+/* tables */
+
+.scroll { overflow-x: auto; }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  font-family: var(--sans);
   font-variant-numeric: tabular-nums;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
 }
-
-th, td {
-  padding: 0.55rem 0.6rem;
-  text-align: left;
-  border-bottom: 1px solid var(--rule);
-  white-space: nowrap;
-}
-
-thead th {
-  border-bottom: 1px solid var(--ink);
-  font-weight: 400;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--mute);
-}
-
+th, td { padding: 0.6rem 0.6rem; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+thead th { border-bottom: 1px solid var(--ink); font-weight: 500; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mute); }
 tbody tr:last-child td { border-bottom: 1px solid var(--ink); }
-
 th:first-child, td:first-child { padding-left: 0; }
 th:last-child, td:last-child { padding-right: 0; }
-
 .num { text-align: right; }
 .rank { width: 1.5rem; color: var(--mute); }
 .model { font-weight: 500; }
 .lab { color: var(--mute); }
 .strong { font-weight: 700; }
 .plot { width: 130px; }
-
-th .n {
-  display: block;
-  font-size: 0.68rem;
-  color: var(--rule);
-  color: #b3b3b3;
-}
-
-.bar {
-  display: inline-block;
-  vertical-align: middle;
-  background: #ededed;
-}
-
-.bar .fill {
-  display: block;
-  height: 100%;
-  background: var(--fill);
-}
-
-.scroll { overflow-x: auto; }
-
 .mute { color: var(--mute); }
+th .n { display: block; font-size: 0.68rem; color: #a9adb3; }
+
+.bar { display: inline-block; vertical-align: middle; background: #e6e8eb; }
+.bar .fill { display: block; height: 100%; background: var(--fill); }
 
 .band { width: 46%; }
-
-.stack {
-  display: flex;
-  width: 100%;
-  height: 7px;
-  background: #ededed;
-}
-
+.stack { display: flex; width: 100%; height: 7px; background: #e6e8eb; }
 .seg { display: block; height: 100%; }
-.seg.always { background: #111; }
-.seg.sometimes { background: #9a9a9a; }
-.seg.never { background: #ededed; }
+.seg.always { background: var(--ink); }
+.seg.sometimes { background: #9a9ea5; }
+.seg.never { background: #e6e8eb; }
 
-.figures {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-bottom: 4rem;
-}
-
-.figure {
-  margin: 0;
-  font-size: 2.6rem;
-  font-weight: 300;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.figure span {
-  font-size: 1.1rem;
-  font-weight: 400;
-  margin-left: 0.1rem;
-}
-
-.caption {
-  margin: 0.55rem 0 0;
-  max-width: 14rem;
-  color: var(--mute);
-  font-size: 0.78rem;
-  line-height: 1.45;
-}
-
-ol, ul { margin: 0 0 0.9rem; padding-left: 1.1rem; max-width: 34rem; }
-li { margin-bottom: 0.3rem; }
-
-ul.links { list-style: none; padding-left: 0; }
-
-dl {
-  display: grid;
-  grid-template-columns: 9rem 1fr;
-  gap: 0.35rem 1rem;
-  margin: 0;
-  max-width: 40rem;
-  font-size: 0.85rem;
-}
-
+dl { display: grid; grid-template-columns: 8rem 1fr; gap: 0.45rem 1rem; margin: 0; font-family: var(--sans); font-size: 0.86rem; }
 dt { color: var(--mute); }
 dd { margin: 0; }
+
+ul.links-list { list-style: none; padding-left: 0; }
+ul.links-list li { margin-bottom: 0.4rem; }
 
 a { color: var(--ink); text-decoration: underline; text-underline-offset: 0.18em; }
 a:hover { color: var(--mute); }
 
-.chart {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 0 0 1.5rem;
-  font-family: inherit;
-}
-
-.chart .grid { stroke: #ececec; stroke-width: 1; }
+.chart { display: block; width: 100%; height: auto; margin: 0; font-family: var(--sans); }
+.chart .grid { stroke: #e6e8eb; stroke-width: 1; }
 .chart .frame { fill: none; stroke: var(--ink); stroke-width: 1; }
 .chart .tick { font-size: 11px; fill: var(--mute); }
 .chart .legend { font-size: 12px; fill: var(--ink); }
 
+footer.wrap { padding-top: 1rem; padding-bottom: 3rem; font-family: var(--sans); font-size: 0.78rem; color: var(--mute); }
+
 /* trace pages */
 
-main.wide { max-width: 72rem; }
+main.wide { padding-top: 2.5rem; }
+.crumb { margin: 0 0 1.25rem; font-family: var(--sans); font-size: 0.82rem; color: var(--mute); }
+h1.study { margin: 0 0 0.4rem; font-size: 2rem; font-weight: 500; letter-spacing: -0.01em; }
+.study-meta { margin: 0 0 2rem; }
+.study-meta.lede { font-family: var(--serif); font-size: 1.05rem; color: var(--ink); }
 
-.crumb { margin: 0 0 1.5rem; color: var(--mute); font-size: 0.8rem; }
-
-h1.study {
-  letter-spacing: 0;
-  text-transform: none;
-  font-size: 1.3rem;
-  font-weight: 500;
-  margin-bottom: 0.4rem;
-}
+.card.section { margin-bottom: 1.5rem; }
+.card.section h2 .marks { font-family: var(--sans); font-size: 0.95rem; vertical-align: middle; }
 
 pre.prompt, pre.reply {
   margin: 0;
   padding: 0.9rem 1rem;
   border: 1px solid var(--rule);
   background: #fafafa;
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 0.78rem;
   line-height: 1.5;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+pre.reply { max-height: 34rem; overflow: auto; }
+pre.reasoning { background: #fff; color: #555; }
 
-pre.reply { border-top: 0; max-height: 34rem; overflow: auto; }
-
-.marks, .att { font-size: 0.85rem; letter-spacing: 0.06em; white-space: nowrap; }
+.marks, .att { font-family: var(--sans); font-size: 0.85rem; letter-spacing: 0.06em; white-space: nowrap; }
 .marks { margin-left: 0.6rem; }
 th.att, td.att { text-align: center; }
 .ok { color: var(--ink); }
-.ko { color: #c4c4c4; }
-
+.ko { color: #c4c7cc; }
 table.traces td.model a { text-decoration: none; }
 table.traces td.model a:hover { text-decoration: underline; }
 
-details.attempt { margin: 0 0 0.5rem; border: 1px solid var(--rule); }
-details.attempt summary {
-  padding: 0.55rem 0.9rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-  list-style: none;
-}
+details.attempt { margin: 0 0 0.6rem; border: 1px solid var(--rule); }
+details.attempt summary { padding: 0.6rem 0.9rem; cursor: pointer; font-family: var(--sans); font-size: 0.86rem; list-style: none; }
 details.attempt summary::-webkit-details-marker { display: none; }
 details.attempt[open] summary { border-bottom: 1px solid var(--rule); }
-.tag {
-  display: inline-block;
-  min-width: 2.6rem;
-  margin-right: 0.6rem;
-  padding: 0.05rem 0.4rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-align: center;
-  border: 1px solid var(--ink);
-}
+details.attempt .body { padding: 0.7rem 0.9rem 1rem; }
+.tag { display: inline-block; min-width: 2.6rem; margin-right: 0.6rem; padding: 0.05rem 0.4rem; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; text-align: center; border: 1px solid var(--ink); }
 .tag.pass { background: var(--ink); color: #fff; }
-.tag.fail { color: var(--mute); border-color: #c4c4c4; }
+.tag.fail { color: var(--mute); border-color: #c4c7cc; }
 .why { color: var(--mute); }
-.why code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.78rem; color: var(--ink); }
-p.nav { display: flex; justify-content: space-between; gap: 1rem; }
-
-.label { margin: 0.9rem 0 0.3rem; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); }
+.why code, table.checks code { font-family: var(--mono); font-size: 0.78rem; color: var(--ink); }
 .meta-inline { color: var(--mute); font-size: 0.78rem; margin-left: 0.4rem; }
-details.attempt .body { padding: 0.6rem 0.9rem 0.9rem; }
-details.attempt .body pre.reply { border-top: 1px solid var(--rule); }
+.label { margin: 0.9rem 0 0.3rem; font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); }
 details.inner { margin: 0.4rem 0 0; }
-details.inner summary { cursor: pointer; font-size: 0.8rem; color: var(--mute); padding: 0.2rem 0; }
-details.inner pre.prompt, details.inner pre.reply { margin-top: 0.4rem; border-top: 1px solid var(--rule); }
-pre.reasoning { background: #fff; color: #444; }
+details.inner summary { cursor: pointer; font-family: var(--sans); font-size: 0.82rem; color: var(--mute); padding: 0.2rem 0; }
+details.inner pre.prompt, details.inner pre.reply { margin-top: 0.4rem; }
 
 table.checks { width: auto; font-size: 0.8rem; margin: 0.3rem 0 0.6rem; }
 table.checks td { padding: 0.25rem 0.7rem 0.25rem 0; border-bottom: 0; white-space: normal; }
 table.checks tbody tr:last-child td { border-bottom: 0; }
 table.checks td.mark { width: 1rem; padding-right: 0.4rem; }
 table.checks td.mark.ko { color: var(--ink); }
-table.checks code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.76rem; }
+p.nav { display: flex; justify-content: space-between; gap: 1rem; font-family: var(--sans); font-size: 0.85rem; }
 
-footer {
-  margin-top: 5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--rule);
-  color: var(--mute);
-  font-size: 0.75rem;
-}
-
-@media (max-width: 640px) {
-  main { padding: 3rem 1.1rem 4rem; }
+@media (max-width: 900px) {
+  .grid, .grid.three, .two, .two.even { grid-template-columns: 1fr; }
+  header.hero { padding: 2.5rem 0; }
+  header.hero h1 { font-size: 2rem; }
+  nav.top .wrap { height: auto; flex-wrap: wrap; gap: 0.5rem 1rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
+  nav.top .links { gap: 0.9rem; flex-wrap: wrap; }
   .plot, th.plot { display: none; }
-  .figures { grid-template-columns: 1fr; gap: 1.75rem; }
-  .figure { font-size: 2.2rem; }
   dl { grid-template-columns: 1fr; gap: 0 0; }
   dt { margin-top: 0.6rem; }
 }
