@@ -1,11 +1,20 @@
 # RadRead leaderboard
 
-Frontier models reading 164 radiographs against a fixed rubric. All checks must pass.
-These scores are not a clinical error rate.
-The cohort was selected using all five models' outcomes to keep every model's pass@4
-below 35%, reusing the same four saved attempts per model and study (3,280 reads).
-This is an outcome-selected challenge set, not an independent holdout or evidence
-of model deterioration.
+Frontier models reading 150 radiographs against a fixed rubric. All checks must pass.
+These scores are not a clinical error rate. The release uses five provider-successful
+attempts per model and study: 750 reads per model, 3,750 across five models, comprising
+3,725 cached reads and 25 newly generated, graded reads.
+
+The parent 164-study cohort was selected using all five models' saved outcomes to keep
+each model's pass@4 below 35%. The current cohort retains the 145 studies that already
+had five cached attempts for every model, plus five of the remaining 19 sampled with
+seed 42 before generating their new fifth attempts, one per model. The selection was
+frozen in `results/pass5_150.selection.json` before those new outcomes. Prompts, images,
+gold and grader are unchanged.
+
+This release inherits the parent's outcome selection: it is an outcome-selected
+challenge subset, not an independent holdout or evidence of general model performance
+deterioration.
 
 - Page: https://dylantirandaz.com/radread-leaderboard/
 - Mirror: https://huggingface.co/spaces/tirandazdylan/radread-leaderboard
