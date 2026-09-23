@@ -1,7 +1,11 @@
 # RadRead leaderboard
 
-Frontier models reading 243 radiographs against a fixed rubric. All checks must pass.
+Frontier models reading 164 radiographs against a fixed rubric. All checks must pass.
 These scores are not a clinical error rate.
+The cohort was selected using all five models' outcomes to keep every model's pass@4
+below 35%, reusing the same four saved attempts per model and study (3,280 reads).
+This is an outcome-selected challenge set, not an independent holdout or evidence
+of model deterioration.
 
 - Page: https://dylantirandaz.com/radread-leaderboard/
 - Mirror: https://huggingface.co/spaces/tirandazdylan/radread-leaderboard

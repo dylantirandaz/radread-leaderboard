@@ -22,6 +22,7 @@ SOURCE_ORDER = [
     "VinDr-CXR",
     "GRAZPEDWRI-DX",
     "RSNA Pneumonia",
+    "FracAtlas",
 ]
 
 SOURCE_SHORT = {
@@ -30,6 +31,7 @@ SOURCE_SHORT = {
     "VinDr-CXR": "VinDr",
     "GRAZPEDWRI-DX": "GRAZ",
     "RSNA Pneumonia": "RSNA",
+    "FracAtlas": "FracAtlas",
 }
 
 REPO_URL = "https://github.com/dylantirandaz/radread-public"
@@ -56,6 +58,7 @@ def bar(value: float, width: int = 120) -> str:
 
 
 def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
+    """Render shared ranks for models sorted by descending pass@k."""
     head = (
         "<thead><tr>"
         "<th class='rank'></th><th>Model</th><th class='lab'>Lab</th>"
@@ -67,10 +70,16 @@ def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
         "</tr></thead>"
     )
     rows = []
+    rank = 0
+    previous_score = None
     for index, model in enumerate(models, 1):
+        score = model[f"pass@{max_k}"]
+        if score != previous_score:
+            rank = index
+        previous_score = score
         rows.append(
             "<tr>"
-            f"<td class='rank'>{index}</td>"
+            f"<td class='rank'>{rank}</td>"
             f"<td class='model'>{html.escape(model['name'])}"
             f"<span class='model-lab'>{html.escape(model['lab'])}</span></td>"
             f"<td class='lab'>{html.escape(model['lab'])}</td>"
@@ -250,32 +259,28 @@ def reliability(models: list[dict[str, Any]], max_k: int) -> str:
     return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
-def repeated_replies(audit: dict[str, Any] | None, models: list[dict[str, Any]]) -> str:
-    if not audit:
-        return ""
-    pairs = sum(m["tasks_with_repeated_reply"] for m in audit["models"])
-    total = sum(m["tasks"] for m in models)
-    return f"Repeated replies: {pairs} of {total:,} model–study pairs."
-
-
-def render(
-    data: dict[str, Any], built: str, audit: dict[str, Any] | None = None
-) -> str:
+def render(data: dict[str, Any], built: str) -> str:
     models = data["models"]
     max_k = data["rollouts_per_task"]
     protocol = data["protocol"]
     unsolved = data["unsolved_by_all"]
     best = models[0]
     best_one = max(models, key=lambda m: m["pass@1"])
+    best_count = sum(
+        model[f"pass@{max_k}"] == best[f"pass@{max_k}"] for model in models
+    )
+    best_one_count = sum(model["pass@1"] == best_one["pass@1"] for model in models)
+    best_label = best["name"] if best_count == 1 else f"{best_count} models tied"
+    best_one_label = (
+        best_one["name"] if best_one_count == 1 else f"{best_one_count} models tied"
+    )
     tasks = data["tasks"]
-    rollouts = sum(m["rollouts"] for m in models)
     unsolved_sources = ", ".join(
         f"{count} {source}"
         for source, count in sorted(
             unsolved["by_source"].items(), key=lambda kv: -kv[1]
         )
     )
-    repeats = repeated_replies(audit, models)
     study_dots = (
         '<span class="solved"></span>' * (tasks - unsolved["count"])
         + '<span class="unsolved"></span>' * unsolved["count"]
@@ -308,14 +313,12 @@ def render(
       Dots are grouped by outcome, not source or task order.">
       {study_dots}
     </div>
-    <p class="eyebrow">{tasks} studies · hollow dots never passed</p>
     <h1><span>Can models read</span> <span>radiographs?</span></h1>
     <p class="hero-description">Findings, boxes, diagnosis, next step. All must pass.</p>
     <div class="action-links">
       <a href="#leaderboard">Results <span aria-hidden="true">↓</span></a>
       <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
     </div>
-    <p class="meta">{len(models)} models · {max_k} attempts per study · {rollouts:,} reads</p>
   </div>
 </header>
 
@@ -328,11 +331,11 @@ def render(
   <div class="metric-grid">
     <div class="figure-card">
       <p class="figure">{pct(best[f'pass@{max_k}'])}<span>%</span></p>
-      <p class="caption">best pass@{max_k} · <span>{html.escape(best['name'])}</span></p>
+      <p class="caption">best pass@{max_k} · <span>{html.escape(best_label)}</span></p>
     </div>
     <div class="figure-card">
       <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
-      <p class="caption">best pass@1 · <span>{html.escape(best_one['name'])}</span></p>
+      <p class="caption">best pass@1 · <span>{html.escape(best_one_label)}</span></p>
     </div>
     <div class="figure-card">
       <p class="figure">{unsolved['count']}</p>
@@ -361,7 +364,6 @@ def render(
     <article class="panel">
       <h3>Passing attempts</h3>
       {reliability(models, max_k)}
-      <p class="caption">{repeats}</p>
     </article>
     <article class="panel">
       <h3>pass@{max_k} by source</h3>
@@ -378,22 +380,21 @@ def render(
   <div class="criteria-grid">
     <article>
       <h3>Findings</h3>
-      <p>Every checklist answer matches gold.</p>
+      <p>The model identifies which findings are present or absent and answers any questions about their location. Every checklist answer must match the reference answer for that image.</p>
     </article>
     <article>
       <h3>Localization</h3>
-      <p>Required lesions localized; extra-box limits met.</p>
+      <p>The model places a box around each required finding. Boxes are checked for overlap, position and size. Each case limits how many extra, unmatched boxes are allowed.</p>
     </article>
     <article>
       <h3>Diagnosis</h3>
-      <p>An accepted diagnosis.</p>
+      <p>The model names the condition. The grader checks for an accepted diagnosis and whether the answer affirms or denies it. Different wording can count; the free-text summary is not scored.</p>
     </article>
     <article>
       <h3>Next step</h3>
-      <p>An accepted management recommendation.</p>
+      <p>The model chooses emergency action, urgent review, routine follow-up or no further action. It must choose an option accepted for that case. A more urgent choice is not automatically correct.</p>
     </article>
   </div>
-  <p class="method-note">All checks must pass. Invalid outputs fail.<br>Rubric agreement—not a clinical error rate.</p>
   <div class="two even protocol-grid">
     <article>
       <h3>Protocol</h3>
@@ -411,6 +412,7 @@ def render(
       <p class="caption"><a href="{REPO_URL}/blob/main/NOTICE.md">Source terms</a> · Images and gold are not distributed.</p>
     </article>
   </div>
+  <p class="caption">These 164 cases were selected using all five models' outcomes to keep every model's pass@4 below 35%. The same four saved attempts per model and study are reused here. This is an outcome-selected challenge set, not an independent holdout or evidence of model deterioration.</p>
 </section>
 
 <section class="explore" aria-labelledby="explore-title">
@@ -765,25 +767,14 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=Path("results/leaderboard.json"))
-    parser.add_argument(
-        "--audit",
-        type=Path,
-        default=Path("results/audit.json"),
-        help="audit output; the repeated-reply count is omitted when the file is absent",
-    )
     parser.add_argument("--out", type=Path, default=Path("site"))
     args = parser.parse_args()
 
     data = json.loads(args.data.read_text(encoding="utf-8"))
-    audit = (
-        json.loads(args.audit.read_text(encoding="utf-8"))
-        if args.audit.is_file()
-        else None
-    )
     built = dt.datetime.now(dt.timezone.utc).date().isoformat()
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "index.html").write_text(
-        render(data, built, audit), encoding="utf-8", newline="\n"
+        render(data, built), encoding="utf-8", newline="\n"
     )
     (args.out / "style.css").write_text(CSS, encoding="utf-8", newline="\n")
     if args.data.resolve() != (args.out / "leaderboard.json").resolve():
