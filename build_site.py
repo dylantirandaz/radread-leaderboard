@@ -350,7 +350,7 @@ def render(data: dict[str, Any], built: str) -> str:
 
 <section class="result-section" aria-labelledby="attempts-title">
   <div class="section-heading">
-    <h2 id="attempts-title">More attempts, more passes?</h2>
+    <h2 id="attempts-title">Pass Rate by Attempt Count</h2>
   </div>
   <div class="curve-layout">
     <figure class="chart-figure">{passk_chart(models, max_k)}</figure>
@@ -375,7 +375,6 @@ def render(data: dict[str, Any], built: str) -> str:
 <section class="result-section" id="method" aria-labelledby="method-title">
   <div class="section-heading">
     <h2 id="method-title">What counts as a pass?</h2>
-    <p>One image. One response. Deterministic scoring.</p>
   </div>
   <div class="criteria-grid">
     <article>
@@ -412,11 +411,10 @@ def render(data: dict[str, Any], built: str) -> str:
       <p class="caption"><a href="{REPO_URL}/blob/main/NOTICE.md">Source terms</a> · Images and gold are not distributed.</p>
     </article>
   </div>
-  <p class="caption">These 164 cases were selected using all five models' outcomes to keep every model's pass@4 below 35%. The same four saved attempts per model and study are reused here. This is an outcome-selected challenge set, not an independent holdout or evidence of model deterioration.</p>
 </section>
 
 <section class="explore" aria-labelledby="explore-title">
-  <h2 id="explore-title">Look closer.</h2>
+  <h2 id="explore-title">Take a Closer Look</h2>
   <div class="action-links">
     <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
     <a href="traces/index.html">Traces <span aria-hidden="true">↗</span></a>
