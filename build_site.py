@@ -316,8 +316,8 @@ def render(data: dict[str, Any], built: str) -> str:
     <h1><span>Can models read</span> <span>radiographs?</span></h1>
     <p class="hero-description">Findings, boxes, diagnosis, next step. All must pass.</p>
     <div class="action-links">
-      <a href="#leaderboard">Results <span aria-hidden="true">↓</span></a>
-      <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
+      <a href="#leaderboard">Results <svg class="link-arrow" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2v12m-4-4 4 4 4-4"/></svg></a>
+      <a href="{REPO_URL}">Benchmark <svg class="link-arrow" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 13 13 3M4 3h9v9"/></svg></a>
     </div>
   </div>
 </header>
@@ -416,9 +416,9 @@ def render(data: dict[str, Any], built: str) -> str:
 <section class="explore" aria-labelledby="explore-title">
   <h2 id="explore-title">Take a Closer Look</h2>
   <div class="action-links">
-    <a href="{REPO_URL}">Benchmark <span aria-hidden="true">↗</span></a>
-    <a href="traces/index.html">Traces <span aria-hidden="true">↗</span></a>
-    <a href="{HF_DATA}">Data <span aria-hidden="true">↗</span></a>
+    <a href="{REPO_URL}">Benchmark <svg class="link-arrow" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 13 13 3M4 3h9v9"/></svg></a>
+    <a href="traces/index.html">Traces <svg class="link-arrow" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 13 13 3M4 3h9v9"/></svg></a>
+    <a href="{HF_DATA}">Data <svg class="link-arrow" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 13 13 3M4 3h9v9"/></svg></a>
   </div>
 </section>
 
@@ -539,7 +539,7 @@ header.hero .meta { margin: 1.8rem 0 0; font-size: 0.75rem; }
 .action-links a:nth-child(2) { border-color: var(--pink); }
 .action-links a:nth-child(3) { border-color: var(--lime); }
 .action-links a:hover { color: var(--mint-ink); border-color: currentColor; }
-.action-links span { margin-left: 0.3rem; }
+.action-links .link-arrow { width: 0.85em; height: 0.85em; margin-left: 0.3rem; vertical-align: -0.02em; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 
 .meta, .caption { font-family: var(--sans); color: var(--mute); font-size: 0.82rem; line-height: 1.55; }
 .caption { margin: 1rem 0 0; }
