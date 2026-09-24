@@ -12,6 +12,7 @@ import argparse
 import datetime as dt
 import html
 import json
+import math
 import shutil
 from pathlib import Path
 from typing import Any
@@ -48,23 +49,73 @@ def pct(value: float) -> str:
     return f"{value * 100:.1f}"
 
 
-def bar(value: float, width: int = 120) -> str:
-    """Render a static result bar; numerical scores remain the authoritative values."""
-    filled = max(0, min(width, round(value * width)))
+def interval(bounds: list[float]) -> str:
+    """Format a fractional confidence interval on the percentage scale."""
+    return f"{pct(bounds[0])}–{pct(bounds[1])}"
+
+
+def results_markdown(data: dict[str, Any]) -> str:
+    """Render the same pass@1-first results for both public README templates."""
+    max_k = data["rollouts_per_task"]
+    rows = [
+        f"| Model | Lab | pass@1 (%) | 95% study-bootstrap CI | {max_k}/{max_k} cases | pass@{max_k} (%) | Never solved |",
+        "|---|---|---:|---:|---:|---:|---:|",
+    ]
+    rows.extend(
+        f"| {m['name']} | {m['lab']} | {pct(m['pass@1'])} | "
+        f"{interval(m['pass@1_ci95'])} | {m['solved_all']} | "
+        f"{pct(m[f'pass@{max_k}'])} | {m['unsolved']} |"
+        for m in data["models"]
+    )
+    return "\n".join(rows)
+
+
+def uncertainty_note(uncertainty: dict[str, Any]) -> str:
+    """Describe the supplied study-level intervals without recalculating them."""
     return (
-        f'<span class="bar" style="width:{width}px" aria-hidden="true">'
-        f'<span class="fill" style="width:{filled}px"></span></span>'
+        f"95% intervals use a {uncertainty['method']}: "
+        f"{uncertainty['resamples']:,} shared resamples of "
+        f"{uncertainty['studies']} studies, seed {uncertainty['seed']}. "
+        "All attempts within a study stay together; attempts are not independent "
+        "resampling units. " + uncertainty["scope"]
+    )
+
+
+def paired_comparisons(data: dict[str, Any]) -> str:
+    """Render every supplied paired pass@1 difference in percentage points."""
+    names = {model["model"]: model["name"] for model in data["models"]}
+    rows = []
+    for pair in data["uncertainty"]["pass@1_comparisons"]:
+        low, high = pair["ci95"]
+        rows.append(
+            "<tr>"
+            f"<td>{html.escape(names[pair['model_a']])}</td>"
+            f"<td>{html.escape(names[pair['model_b']])}</td>"
+            f"<td class='num'>{pair['difference'] * 100:+.1f}</td>"
+            f"<td class='num'>{low * 100:+.1f} to {high * 100:+.1f}</td>"
+            "</tr>"
+        )
+    return (
+        "<details class='uncertainty'><summary>Paired pass@1 differences &amp; uncertainty</summary>"
+        f"<p class='caption'>{html.escape(uncertainty_note(data['uncertainty']))}</p>"
+        "<p class='caption'>A − B, in percentage points. An interval spanning zero "
+        "does not resolve the direction. These pairwise intervals are not adjusted "
+        "for multiple comparisons and do not establish general model superiority.</p>"
+        "<div class='scroll'><table class='board tight'><thead><tr>"
+        "<th>Model A</th><th>Model B</th><th class='num'>A − B (pp)</th>"
+        "<th class='num'>95% CI (pp)</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div></details>"
     )
 
 
 def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
-    """Render shared ranks for models sorted by descending pass@k."""
+    """Render shared point-estimate ranks in the producer's pass@1 order."""
     head = (
         "<thead><tr>"
         "<th class='rank'></th><th>Model</th><th class='lab'>Lab</th>"
-        "<th class='num'>pass@1</th>"
-        f"<th class='num'>pass@{max_k}</th>"
-        "<th class='plot'></th>"
+        "<th class='num primary'>pass@1 (%)<span class='n'>95% study-bootstrap CI</span></th>"
+        f"<th class='num'>{max_k}/{max_k} cases</th>"
+        f"<th class='num'>pass@{max_k} (%)</th>"
         "<th class='num'>Checks</th>"
         "<th class='num'>Never solved</th>"
         "</tr></thead>"
@@ -73,8 +124,10 @@ def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
     rank = 0
     previous_score = None
     for index, model in enumerate(models, 1):
-        score = model[f"pass@{max_k}"]
-        if score != previous_score:
+        score = model["pass@1"]
+        if previous_score is None or not math.isclose(
+            score, previous_score, rel_tol=0, abs_tol=1e-12
+        ):
             rank = index
         previous_score = score
         rows.append(
@@ -83,9 +136,10 @@ def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
             f"<td class='model'>{html.escape(model['name'])}"
             f"<span class='model-lab'>{html.escape(model['lab'])}</span></td>"
             f"<td class='lab'>{html.escape(model['lab'])}</td>"
-            f"<td class='num'>{pct(model['pass@1'])}</td>"
-            f"<td class='num strong'>{pct(model[f'pass@{max_k}'])}</td>"
-            f"<td class='plot'>{bar(model[f'pass@{max_k}'])}</td>"
+            f"<td class='num primary strong'>{pct(score)}"
+            f"<span class='ci'>{interval(model['pass@1_ci95'])}</span></td>"
+            f"<td class='num'>{model['solved_all']}</td>"
+            f"<td class='num'>{pct(model[f'pass@{max_k}'])}</td>"
             f"<td class='num'>{pct(model['checks_accuracy'])}</td>"
             f"<td class='num'>{model['unsolved']}</td>"
             "</tr>"
@@ -109,7 +163,7 @@ def curve_table(models: list[dict[str, Any]], max_k: int) -> str:
     return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
-def source_table(models: list[dict[str, Any]], max_k: int) -> str:
+def source_table(models: list[dict[str, Any]]) -> str:
     sources = [s for s in SOURCE_ORDER if any(s in m["by_source"] for m in models)]
     counts = {}
     for source in sources:
@@ -130,7 +184,7 @@ def source_table(models: list[dict[str, Any]], max_k: int) -> str:
     for model in models:
         cells = "".join(
             (
-                f"<td class='num'>{pct(model['by_source'][s][f'pass@{max_k}'])}</td>"
+                f"<td class='num'>{pct(model['by_source'][s]['pass@1'])}</td>"
                 if s in model["by_source"]
                 else "<td class='num mute'>—</td>"
             )
@@ -264,15 +318,26 @@ def render(data: dict[str, Any], built: str) -> str:
     max_k = data["rollouts_per_task"]
     protocol = data["protocol"]
     unsolved = data["unsolved_by_all"]
-    best = models[0]
     best_one = max(models, key=lambda m: m["pass@1"])
-    best_count = sum(
-        model[f"pass@{max_k}"] == best[f"pass@{max_k}"] for model in models
+    best_all = max(models, key=lambda m: m["solved_all"])
+    best_k = max(models, key=lambda m: m[f"pass@{max_k}"])
+    best_one_detail = "<br>".join(
+        f"<span>{html.escape(model['name'])}</span> · "
+        f"95% CI {interval(model['pass@1_ci95'])}%"
+        for model in models
+        if math.isclose(model["pass@1"], best_one["pass@1"], rel_tol=0, abs_tol=1e-12)
     )
-    best_one_count = sum(model["pass@1"] == best_one["pass@1"] for model in models)
-    best_label = best["name"] if best_count == 1 else f"{best_count} models tied"
-    best_one_label = (
-        best_one["name"] if best_one_count == 1 else f"{best_one_count} models tied"
+    best_all_label = " / ".join(
+        model["name"]
+        for model in models
+        if model["solved_all"] == best_all["solved_all"]
+    )
+    best_k_label = " / ".join(
+        model["name"]
+        for model in models
+        if math.isclose(
+            model[f"pass@{max_k}"], best_k[f"pass@{max_k}"], rel_tol=0, abs_tol=1e-12
+        )
     )
     tasks = data["tasks"]
     unsolved_sources = ", ".join(
@@ -330,12 +395,12 @@ def render(data: dict[str, Any], built: str) -> str:
   </div>
   <div class="metric-grid">
     <div class="figure-card">
-      <p class="figure">{pct(best[f'pass@{max_k}'])}<span>%</span></p>
-      <p class="caption">best pass@{max_k} · <span>{html.escape(best_label)}</span></p>
+      <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
+      <p class="caption">highest pass@1 estimate<br>{best_one_detail}</p>
     </div>
     <div class="figure-card">
-      <p class="figure">{pct(best_one['pass@1'])}<span>%</span></p>
-      <p class="caption">best pass@1 · <span>{html.escape(best_one_label)}</span></p>
+      <p class="figure">{best_all['solved_all']}<span>/{tasks}</span></p>
+      <p class="caption">most {max_k}/{max_k} cases · <span>{html.escape(best_all_label)}</span></p>
     </div>
     <div class="figure-card">
       <p class="figure">{unsolved['count']}</p>
@@ -344,7 +409,9 @@ def render(data: dict[str, Any], built: str) -> str:
   </div>
   <div class="readout">
   {leaderboard_table(models, max_k)}
-  <p class="caption">pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed. Never solved = 0/{max_k}.</p>
+  <p class="caption">Ordered by pass@1 point estimate, not proven superiority. pass@1 is the mean single-attempt pass rate across studies; {max_k}/{max_k} counts cases passing every attempt. pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed (%). Never solved = 0/{max_k}.</p>
+  <p class="caption">Secondary: highest pass@{max_k} = {pct(best_k[f'pass@{max_k}'])}% ({html.escape(best_k_label)}).</p>
+  {paired_comparisons(data)}
   </div>
 </section>
 
@@ -366,8 +433,9 @@ def render(data: dict[str, Any], built: str) -> str:
       {reliability(models, max_k)}
     </article>
     <article class="panel">
-      <h3>pass@{max_k} by source</h3>
-      {source_table(models, max_k)}
+      <h3>pass@1 by source</h3>
+      {source_table(models)}
+      <p class="caption">Exploratory small-n breakdown (%); counts under each source label. Source subsets differ in case mix and selection, so these are not source-comparison estimates.</p>
     </article>
   </div>
 </section>
@@ -387,13 +455,14 @@ def render(data: dict[str, Any], built: str) -> str:
     </article>
     <article>
       <h3>Diagnosis</h3>
-      <p>The model names the condition. The grader checks for an accepted diagnosis and whether the answer affirms or denies it. Different wording can count; the free-text summary is not scored.</p>
+      <p>The grader matches accepted diagnosis terms and affirmation or denial. This is lexical matching, not disease-level diagnostic validation; the free-text summary is not scored.</p>
     </article>
     <article>
       <h3>Next step</h3>
-      <p>The model chooses emergency action, urgent review, routine follow-up or no further action. It must choose an option accepted for that case. A more urgent choice is not automatically correct.</p>
+      <p>The selected action must belong to the case's accepted set. This deterministic membership check is not clinical adjudication: urgent_review is accepted on 148 of 150 keys, so urgency discrimination is weak.</p>
     </article>
   </div>
+  <p class="method-note">public150-pass5-audit1 regrades the same 150 studies and 3,750 saved responses, with no new inference. NIH14 retains its source right-lateral box and removes a contradictory left-hilar alternative. ChestDet26 adds an omitted source calcification as optional; both existing foci remain required. The laterality audit is corrected. These are source-backed corrections, not clinical validation. The cohort was selected using model outcomes, not held out independently; descriptive intervals do not remove this selection bias.</p>
   <div class="two even protocol-grid">
     <article>
       <h3>Protocol</h3>
@@ -592,13 +661,13 @@ main.wrap { padding-bottom: 2rem; }
 .figure { margin: 0; font-size: clamp(1.9rem, 3.2vw, 2.5rem); font-weight: 400; line-height: 1; letter-spacing: -0.045em; font-variant-numeric: lining-nums tabular-nums; }
 .figure span { font-size: 1rem; margin-left: 0.1rem; }
 .figure-card .caption { margin: 0.7rem 0 0; font-size: 0.75rem; }
-.figure-card .caption span { white-space: nowrap; }
+.figure-card .caption span { overflow-wrap: anywhere; }
 .figure-card:first-child .figure { color: var(--mint-ink); }
 .figure-card:nth-child(2) .figure { color: var(--pink-ink); }
 
 /* tables */
 
-.scroll { overflow-x: auto; }
+.scroll { min-width: 0; max-width: 100%; overflow-x: auto; }
 
 table {
   width: 100%;
@@ -616,21 +685,23 @@ th:last-child, td:last-child { padding-right: 0; }
 .readout .board, .curve-layout .board { background: rgba(255, 255, 255, 0.9); }
 .readout .board th, .readout .board td { padding-left: 0.6rem; padding-right: 0.6rem; }
 .readout .board thead th, .curve-layout .board thead th { background: rgba(152, 230, 197, 0.035); color: var(--mint-ink); border-bottom-color: var(--rule); }
-.readout .board th:nth-child(4), .readout .board td:nth-child(4) { background: rgba(243, 197, 229, 0.025); }
-.readout .board th:nth-child(5), .readout .board td:nth-child(5),
-.curve-layout .board th:last-child, .curve-layout .board td:last-child { background: rgba(152, 230, 197, 0.04); color: var(--mint-ink); }
+.readout .board .primary { background: rgba(152, 230, 197, 0.04); color: var(--mint-ink); }
+.ci { display: block; margin-top: 0.2rem; color: var(--mute); font-size: 0.72rem; font-weight: 400; }
+.uncertainty { min-width: 0; margin-top: 1.25rem; border-top: 1px solid var(--rule); }
+.uncertainty summary { padding: 0.8rem 0; cursor: pointer; font-family: var(--sans); font-size: 0.84rem; }
+.uncertainty .caption { margin: 0 0 0.85rem; }
+.uncertainty table { font-size: 0.82rem; }
+.uncertainty th:first-child, .uncertainty td:first-child,
+.uncertainty th:nth-child(2), .uncertainty td:nth-child(2) { white-space: normal; min-width: 7rem; }
 .num { text-align: right; }
 .rank { width: 1.5rem; color: var(--mute); }
 .model { font-weight: 500; }
 .model-lab { display: none; }
 .lab { color: var(--mute); }
 .strong { font-weight: 700; }
-.plot { width: 130px; }
 .mute { color: var(--mute); }
 th .n { display: block; font-size: 0.68rem; color: var(--mute); }
 
-.bar { display: inline-block; height: 7px; vertical-align: middle; background: #eee; overflow: hidden; }
-.bar .fill { display: block; height: 100%; background: #222; }
 
 .band { width: 46%; }
 .stack { display: flex; width: 100%; height: 7px; background: var(--pink); }
@@ -720,7 +791,6 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
 
 @media (max-width: 1000px) {
   .criteria-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .plot, th.plot { display: none; }
 }
 
 @media (max-width: 800px) {
@@ -744,8 +814,9 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
   header.hero .meta { font-size: 0.72rem; }
   .result-section { margin-bottom: 4.5rem; scroll-margin-top: 7.5rem; }
   .section-heading { margin-bottom: 2rem; }
-  .metric-grid { gap: 0; margin: 2.5rem 0; }
-  .figure-card { padding: 0 0.4rem; }
+  .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 0.75rem; margin: 2.5rem 0; }
+  .figure-card { min-width: 0; padding: 0 0.4rem; }
+  .figure-card:last-child { grid-column: 1 / -1; }
   .panel { padding: 1.2rem; }
   .criteria-grid { gap: 1.75rem 1.25rem; }
   .protocol-grid { margin-top: 2.5rem; }
