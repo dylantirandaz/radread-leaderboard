@@ -394,7 +394,6 @@ def render(data: dict[str, Any], built: str) -> str:
     <article class="panel">
       <h3>pass@1 by source</h3>
       {source_table(models)}
-      <p class="caption">Exploratory small-n breakdown (%); counts under each source label. Source subsets differ in case mix and selection, so these are not source-comparison estimates.</p>
     </article>
   </div>
 </section>
