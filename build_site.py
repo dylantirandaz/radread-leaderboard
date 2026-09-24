@@ -81,39 +81,12 @@ def uncertainty_note(uncertainty: dict[str, Any]) -> str:
     )
 
 
-def paired_comparisons(data: dict[str, Any]) -> str:
-    """Render every supplied paired pass@1 difference in percentage points."""
-    names = {model["model"]: model["name"] for model in data["models"]}
-    rows = []
-    for pair in data["uncertainty"]["pass@1_comparisons"]:
-        low, high = pair["ci95"]
-        rows.append(
-            "<tr>"
-            f"<td>{html.escape(names[pair['model_a']])}</td>"
-            f"<td>{html.escape(names[pair['model_b']])}</td>"
-            f"<td class='num'>{pair['difference'] * 100:+.1f}</td>"
-            f"<td class='num'>{low * 100:+.1f} to {high * 100:+.1f}</td>"
-            "</tr>"
-        )
-    return (
-        "<details class='uncertainty'><summary>Paired pass@1 differences &amp; uncertainty</summary>"
-        f"<p class='caption'>{html.escape(uncertainty_note(data['uncertainty']))}</p>"
-        "<p class='caption'>A − B, in percentage points. An interval spanning zero "
-        "does not resolve the direction. These pairwise intervals are not adjusted "
-        "for multiple comparisons and do not establish general model superiority.</p>"
-        "<div class='scroll'><table class='board tight'><thead><tr>"
-        "<th>Model A</th><th>Model B</th><th class='num'>A − B (pp)</th>"
-        "<th class='num'>95% CI (pp)</th></tr></thead>"
-        f"<tbody>{''.join(rows)}</tbody></table></div></details>"
-    )
-
-
 def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
     """Render shared point-estimate ranks in the producer's pass@1 order."""
     head = (
         "<thead><tr>"
         "<th class='rank'></th><th>Model</th><th class='lab'>Lab</th>"
-        "<th class='num primary'>pass@1 (%)<span class='n'>95% study-bootstrap CI</span></th>"
+        "<th class='num primary'>pass@1 (%)</th>"
         f"<th class='num'>{max_k}/{max_k} cases</th>"
         f"<th class='num'>pass@{max_k} (%)</th>"
         "<th class='num'>Checks</th>"
@@ -136,8 +109,7 @@ def leaderboard_table(models: list[dict[str, Any]], max_k: int) -> str:
             f"<td class='model'>{html.escape(model['name'])}"
             f"<span class='model-lab'>{html.escape(model['lab'])}</span></td>"
             f"<td class='lab'>{html.escape(model['lab'])}</td>"
-            f"<td class='num primary strong'>{pct(score)}"
-            f"<span class='ci'>{interval(model['pass@1_ci95'])}</span></td>"
+            f"<td class='num primary strong'>{pct(score)}</td>"
             f"<td class='num'>{model['solved_all']}</td>"
             f"<td class='num'>{pct(model[f'pass@{max_k}'])}</td>"
             f"<td class='num'>{pct(model['checks_accuracy'])}</td>"
@@ -320,10 +292,8 @@ def render(data: dict[str, Any], built: str) -> str:
     unsolved = data["unsolved_by_all"]
     best_one = max(models, key=lambda m: m["pass@1"])
     best_all = max(models, key=lambda m: m["solved_all"])
-    best_k = max(models, key=lambda m: m[f"pass@{max_k}"])
     best_one_detail = "<br>".join(
-        f"<span>{html.escape(model['name'])}</span> · "
-        f"95% CI {interval(model['pass@1_ci95'])}%"
+        f"<span>{html.escape(model['name'])}</span>"
         for model in models
         if math.isclose(model["pass@1"], best_one["pass@1"], rel_tol=0, abs_tol=1e-12)
     )
@@ -331,13 +301,6 @@ def render(data: dict[str, Any], built: str) -> str:
         model["name"]
         for model in models
         if model["solved_all"] == best_all["solved_all"]
-    )
-    best_k_label = " / ".join(
-        model["name"]
-        for model in models
-        if math.isclose(
-            model[f"pass@{max_k}"], best_k[f"pass@{max_k}"], rel_tol=0, abs_tol=1e-12
-        )
     )
     tasks = data["tasks"]
     unsolved_sources = ", ".join(
@@ -409,9 +372,7 @@ def render(data: dict[str, Any], built: str) -> str:
   </div>
   <div class="readout">
   {leaderboard_table(models, max_k)}
-  <p class="caption">Ordered by pass@1 point estimate, not proven superiority. pass@1 is the mean single-attempt pass rate across studies; {max_k}/{max_k} counts cases passing every attempt. pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed (%). Never solved = 0/{max_k}.</p>
-  <p class="caption">Secondary: highest pass@{max_k} = {pct(best_k[f'pass@{max_k}'])}% ({html.escape(best_k_label)}).</p>
-  {paired_comparisons(data)}
+  <p class="caption">pass@1 is the mean single-attempt pass rate across studies; {max_k}/{max_k} counts cases passing every attempt. pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed (%). Never solved = 0/{max_k}.</p>
   </div>
 </section>
 
@@ -462,7 +423,6 @@ def render(data: dict[str, Any], built: str) -> str:
       <p>The selected action must belong to the case's accepted set. This deterministic membership check is not clinical adjudication: urgent_review is accepted on 148 of 150 keys, so urgency discrimination is weak.</p>
     </article>
   </div>
-  <p class="method-note">public150-pass5-audit1 regrades the same 150 studies and 3,750 saved responses, with no new inference. NIH14 retains its source right-lateral box and removes a contradictory left-hilar alternative. ChestDet26 adds an omitted source calcification as optional; both existing foci remain required. The laterality audit is corrected. These are source-backed corrections, not clinical validation. The cohort was selected using model outcomes, not held out independently; descriptive intervals do not remove this selection bias.</p>
   <div class="two even protocol-grid">
     <article>
       <h3>Protocol</h3>
@@ -634,7 +594,6 @@ main.wrap { padding-bottom: 2rem; }
 .criteria-grid article:nth-child(4) { border-color: var(--lavender); }
 .criteria-grid h3 { font-family: var(--sans); font-size: 0.9rem; font-weight: 500; }
 .criteria-grid p { margin: 0; font-family: var(--sans); color: var(--mute); font-size: 0.85rem; line-height: 1.6; }
-.method-note { margin: 2.5rem auto 0; max-width: 38rem; text-align: center; font-size: 0.95rem; color: var(--mute); text-wrap: balance; }
 .protocol-grid { margin-top: 3rem; }
 .protocol-grid p { margin: 0 0 1rem; }
 .explore { padding: 1rem 0 5rem; text-align: center; }
@@ -686,13 +645,6 @@ th:last-child, td:last-child { padding-right: 0; }
 .readout .board th, .readout .board td { padding-left: 0.6rem; padding-right: 0.6rem; }
 .readout .board thead th, .curve-layout .board thead th { background: rgba(152, 230, 197, 0.035); color: var(--mint-ink); border-bottom-color: var(--rule); }
 .readout .board .primary { background: rgba(152, 230, 197, 0.04); color: var(--mint-ink); }
-.ci { display: block; margin-top: 0.2rem; color: var(--mute); font-size: 0.72rem; font-weight: 400; }
-.uncertainty { min-width: 0; margin-top: 1.25rem; border-top: 1px solid var(--rule); }
-.uncertainty summary { padding: 0.8rem 0; cursor: pointer; font-family: var(--sans); font-size: 0.84rem; }
-.uncertainty .caption { margin: 0 0 0.85rem; }
-.uncertainty table { font-size: 0.82rem; }
-.uncertainty th:first-child, .uncertainty td:first-child,
-.uncertainty th:nth-child(2), .uncertainty td:nth-child(2) { white-space: normal; min-width: 7rem; }
 .num { text-align: right; }
 .rank { width: 1.5rem; color: var(--mute); }
 .model { font-weight: 500; }

@@ -18,7 +18,8 @@ This correction regrades the same five saved attempts per study and model:
 Rows follow pass@1 point estimates, not proven superiority. pass@1 is the mean
 single-attempt pass rate across studies; 5/5 counts cases passing every attempt.
 pass@5 is secondary and means at least one pass, not consistent reliability.
-The page retains pass@k curves and all paired pass@1 differences (percentage points).
+The page retains pass@k curves. Full paired pass@1 differences (percentage points)
+remain available in `leaderboard.json`.
 95% intervals use a paired percentile study bootstrap: 10,000 shared resamples of 150 studies, seed 42. All attempts within a study stay together; attempts are not independent resampling units. Descriptive intervals conditional on this outcome-selected challenge cohort and its saved responses, not an independent holdout or population/clinical validation. Studies, not individual attempts, are resampled. Intervals do not account for cohort selection, gold-label uncertainty, or future responses; pairwise intervals are not adjusted for multiple comparisons.
 Pairwise intervals are not multiplicity-adjusted. Small-n source breakdowns are exploratory.
 
