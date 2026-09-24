@@ -371,7 +371,6 @@ def render(data: dict[str, Any], built: str) -> str:
   </div>
   <div class="readout">
   {leaderboard_table(models, max_k)}
-  <p class="caption">pass@1 is the mean single-attempt pass rate across studies; {max_k}/{max_k} counts cases passing every attempt. pass@k estimates ≥1 pass in k attempts. Checks = mean checks passed (%). Never solved = 0/{max_k}.</p>
   </div>
 </section>
 
