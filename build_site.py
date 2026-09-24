@@ -165,7 +165,7 @@ def source_table(models: list[dict[str, Any]]) -> str:
         rows.append(
             f"<tr><td class='model'>{html.escape(model['name'])}</td>{cells}</tr>"
         )
-    return f"<div class='scroll'><table class='board tight'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
+    return f"<div class='scroll'><table class='board tight source-table'>{head}<tbody>{''.join(rows)}</tbody></table></div>"
 
 
 LINE_STYLES = (
@@ -342,7 +342,6 @@ def render(data: dict[str, Any], built: str) -> str:
       {study_dots}
     </div>
     <h1><span>Can models read</span> <span>radiographs?</span></h1>
-    <p class="hero-description">Findings, boxes, diagnosis, next step. All must pass.</p>
     <div class="action-links">
       <a href="#leaderboard">Results <svg class="link-arrow" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2v12m-4-4 4 4 4-4"/></svg></a>
       <a href="{REPO_URL}">Benchmark <svg class="link-arrow" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 13 13 3M4 3h9v9"/></svg></a>
@@ -388,7 +387,7 @@ def render(data: dict[str, Any], built: str) -> str:
 
 <section class="result-section" aria-labelledby="breakdown-title">
   <div class="section-heading"><h2 id="breakdown-title">Source &amp; consistency</h2></div>
-  <div class="two even">
+  <div class="breakdown-layout">
     <article class="panel">
       <h3>Passing attempts</h3>
       {reliability(models, max_k)}
@@ -561,7 +560,6 @@ header.hero h1 {
   text-wrap: balance;
 }
 header.hero h1 span { display: block; }
-.hero-description { margin: 0 auto; max-width: 27rem; color: var(--mute); font-size: 1.05rem; line-height: 1.6; text-wrap: balance; }
 header.hero .meta { margin: 1.8rem 0 0; font-size: 0.75rem; }
 .action-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem 1.75rem; margin-top: 1.8rem; font-family: var(--sans); font-size: 0.84rem; }
 .action-links a { padding: 0.35rem 0; text-decoration: none; border-bottom: 2px solid var(--mint); }
@@ -580,6 +578,7 @@ main.wrap { padding-bottom: 2rem; }
 .section-heading p { max-width: 34rem; margin: 0 auto; color: var(--mute); font-family: var(--sans); font-size: 0.9rem; text-wrap: balance; }
 .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin: 3rem 0; }
 .curve-layout { max-width: 46rem; margin: 0 auto; display: grid; gap: 1.5rem; }
+.breakdown-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
 .two.even { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
 .two > *, .criteria-grid > * { min-width: 0; }
 .panel { min-width: 0; padding: 1.5rem; background: var(--mint-wash); border-radius: 0.35rem; }
@@ -587,6 +586,7 @@ main.wrap { padding-bottom: 2rem; }
 .landing h3 { margin: 0 0 1rem; font-size: 1.2rem; font-weight: 400; line-height: 1.3; }
 .panel th, .panel td { padding-left: 0.5rem; padding-right: 0.5rem; }
 .panel table { font-size: 0.8rem; }
+.source-table { min-width: 42rem; }
 .criteria-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; }
 .criteria-grid article { padding-top: 1rem; border-top: 3px solid var(--mint); }
 .criteria-grid article:nth-child(2) { border-color: var(--pink); }
@@ -762,7 +762,6 @@ p.nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1re
   .readout .model-lab { display: block; margin-top: 0.15rem; font-size: 0.7rem; font-weight: 400; color: var(--mute); }
   header.hero { padding: 2.5rem 0 4.5rem; }
   .study-map { margin-bottom: 1.5rem; }
-  .hero-description { font-size: 1rem; }
   header.hero .meta { font-size: 0.72rem; }
   .result-section { margin-bottom: 4.5rem; scroll-margin-top: 7.5rem; }
   .section-heading { margin-bottom: 2rem; }
